@@ -1,6 +1,6 @@
 import threading
 import time
-import scripts
+from scripts.load_settings import load_settings
 from components.dht11 import run_dht
 
 
@@ -15,13 +15,13 @@ if __name__ == "__main__":
     print("*** G3 Tim7 ***")
     threads = []
     stop_event = threading.Event()
-    pi1_settings = scripts.load_setting("1")
+    pi1_settings = load_settings("1")
     try:
         dht1_settings = pi1_settings['RDHT1']
         dht2_settings = pi1_settings['RDHT2']
 
         run_dht(dht1_settings, threads, stop_event)
-        run_dht(dht2_settings,threads,stop_event)
+        run_dht(dht2_settings, threads, stop_event)
         while True:
             time.sleep(1)
 
