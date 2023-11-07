@@ -8,5 +8,25 @@
       "name": "RDH2",
       "simulated": true,
       "pin": 17
+    },
+    "RPIR1": {
+      "name": "RDH2",
+      "simulated": true,
+      "pin": 22
+    },
+    "RPIR2": {
+      "name": "RDH2",
+      "simulated": true,
+      "pin": 23
+    },
+    "DPIR1": {
+      "name": "RDH2",
+      "simulated": true,
+      "pin": 24
+    },
+    "DUS1": {
+      "name": "DUS1",
+      "simulated": true,
+      "pin": 25
     }
   }
