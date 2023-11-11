@@ -1,22 +1,24 @@
-
-
 from sim.dht11 import run_dht_simulator
 import threading
 import time
 
-def dht_callback(humidity, temperature, code, name):
+
+def dht_callback(humidity, temperature, code, name, table):
     t = time.localtime()
-    print("="*20+">"+ name)
-    print(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
-    print(f"Code: {code}")
-    print(f"Humidity: {humidity}%")
-    print(f"Temperature: {temperature}°C")
+    t = time.strftime('%H:%M:%S', t)
+    # print("="*20+">"+ name)
+    # print(f"=Timestamp: {time.strftime('%H:%M:%S', t)}")
+    # print(f"=Code: {code}")
+    # print(f"=Humidity: {humidity}%")
+    # print(f"=Temperature: {temperature}°C")
+    # print("="*20)
+    table.add_row([name, t, f"{humidity}%", f"{temperature}°C", code])
 
 
 def run_dht(settings, threads, stop_event):
         if settings['simulated']:
             print("Starting dht1 sumulator")
-            dht1_thread = threading.Thread(target = run_dht_simulator, args=(2, dht_callback, stop_event, settings['name']))
+            dht1_thread = threading.Thread(target = run_dht_simulator, args=(4, dht_callback, stop_event, settings['name']))
             dht1_thread.start()
             threads.append(dht1_thread)
             print("Dht1 sumulator started")

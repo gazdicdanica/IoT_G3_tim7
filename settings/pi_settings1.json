@@ -1,26 +1,26 @@
 {
     "RDHT1": {
-      "name": "RDH1",
+      "name": "RDHT1",
       "simulated": true,
       "pin": 27
     },
     "RDHT2": {
-      "name": "RDH2",
+      "name": "RDHT2",
       "simulated": true,
       "pin": 17
     },
     "RPIR1": {
-      "name": "RDH2",
+      "name": "RPIR1",
       "simulated": true,
       "pin": 22
     },
     "RPIR2": {
-      "name": "RDH2",
+      "name": "RPIR2",
       "simulated": true,
       "pin": 23
     },
     "DPIR1": {
-      "name": "RDH2",
+      "name": "DPIR1",
       "simulated": true,
       "pin": 24
     },
