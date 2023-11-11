@@ -2,16 +2,20 @@ from sim.hcsr04 import run_ultrasonic_simulator  # Import the ultrasonic simulat
 import threading
 import time
 
-def ultrasonic_callback(distance, name):
+
+def ultrasonic_callback(distance, name, table):
     t = time.localtime()
-    print("=" * 20 + ">" + name)
-    print(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
-    print(f"Distance: {distance} cm")
+    t = time.strftime('%H:%M:%S', t)
+    # print("=" * 20 + ">" + name)
+    # print(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    # print(f"Distance: {distance} cm")
+    table.add_row([name, t, f"{distance} cm"])
+
 
 def run_ultrasonic(settings, threads, stop_event):
     if settings['simulated']:
         print("Starting Ultrasonic simulator")
-        ultrasonic_thread = threading.Thread(target=run_ultrasonic_simulator, args=(2, ultrasonic_callback, stop_event, settings['name']))
+        ultrasonic_thread = threading.Thread(target=run_ultrasonic_simulator, args=(2.5, ultrasonic_callback, stop_event, settings['name']))
         ultrasonic_thread.start()
         threads.append(ultrasonic_thread)
         print("Ultrasonic simulator started")
