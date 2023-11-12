@@ -33,3 +33,12 @@ class UltrasonicSensor:
         distance = (time_elapsed * 34300) / 2  # Speed of sound is 34300 cm/s
         
         return distance
+
+
+def run_ultrasonic_loop(ultrasonic, delay, callback, stop_event, name):
+    while True:
+        distance = ultrasonic.get_distance()
+        callback(distance, name)
+        if stop_event.is_set():
+            break
+        time.sleep(delay)
