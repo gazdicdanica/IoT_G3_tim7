@@ -9,3 +9,12 @@ class PIR:
     def motionDetected(self):
         GPIO.setup(self.pin, GPIO.IN)
         return GPIO.input(self.pin)
+
+
+def run_pir_loop(pir, delay, callback, stop_event, name):
+    while True:
+        motion_detected = pir.motionDetected()
+        callback(motion_detected, name)
+        if stop_event.is_set():
+            break
+        time.sleep(delay)
