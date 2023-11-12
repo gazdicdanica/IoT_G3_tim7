@@ -17,4 +17,10 @@ def run_dms(settings, threads, stop_event):
         threads.append(dms_thread)
         print("DMS simulator started")
     else:
-        pass
+        from sensors.dms import run_dms_loop, DMS
+        print("Starting DMS loop")
+        dms = DMS(settings['name'], settings['pins'])
+        dms_thread = threading.Thread(target=run_dms_loop, args=(dms, 2, dms_callback, stop_event, settings['name']))
+        dms_thread.start()
+        threads.append(dms_thread)
+        print("DMS loop started")
