@@ -4,15 +4,15 @@ import time
 
 
 def dms_callback(door_unlocked, name, table):
-    time = time.localtime()
-    time = time.strftime('%H:%M:%S', time)
+    t = time.localtime()
+    t = time.strftime('%H:%M:%S', t)
 
-    table.add_row([name, time, door_unlocked])
+    table.add_row([name, t, door_unlocked])
 
-def run_ds(settings, threads, stop_event):
+def run_dms(settings, threads, stop_event):
     if settings["simulated"]:
         print("Starting DMS simulator")
-        dms_thread = threading.Thread(target=dms_callback, args=())
+        dms_thread = threading.Thread(target=run_dms_simulator, args=(4, dms_callback, stop_event, settings['name']))
         dms_thread.start()
         threads.append(dms_thread)
         print("DMS simulator started")
