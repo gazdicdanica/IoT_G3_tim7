@@ -7,12 +7,14 @@ from components.dl import run_dl
 from components.hcsr04 import run_ultrasonic
 from components.ds import run_ds
 from components.dms import run_dms
+from components.db import run_db
 import sim.dht11 as dht_data
 import sim.pir as pir_data
 import sim.hcsr04 as hcsr_data
 import sim.ds as ds_data
 import sim.dms as dms_data
 import sim.dl as dl_data
+import sim.db as db_data
 from prettytable import PrettyTable
 from queue import Queue
 
@@ -46,20 +48,20 @@ def concat_tables(table1, table2, table3):
 
     return concatenated_table
 
-def door_tables(table1, table2, table3):
-    max_rows = max(len(table1._rows), len(table2._rows), len(table3._rows))
+def door_tables(table1, table2, table3, table4):
+    max_rows = max(len(table1._rows), len(table2._rows), len(table3._rows), len(table4._rows))
 
-    for table in [table1, table2, table3]:
+    for table in [table1, table2, table3, table4]:
         while len(table._rows) < max_rows:
             table.add_row([""] * len(table.field_names))
 
     door_table = PrettyTable()
 
-    for field_name in table1.field_names +  table2.field_names + table3.field_names:
+    for field_name in table1.field_names +  table2.field_names + table3.field_names + table4.field_names:
         door_table.add_column(field_name, [])
 
-    for row1, row2, row3 in zip(table1._rows, table2._rows, table3._rows):
-        door_table.add_row(row1 + row2 + row3)
+    for row1, row2, row3, row4 in zip(table1._rows, table2._rows, table3._rows, table4._rows):
+        door_table.add_row(row1 + row2 + row3 + row4)
 
     return door_table
 
@@ -98,6 +100,7 @@ if __name__ == "__main__":
         ds1_settings = pi1_settings['DS1']
         dms_settings = pi1_settings['DMS']
         dl_settings = pi1_settings['DL']
+        db_settings = pi1_settings['DB']
 
         run_user_input_threads(threads, stop_event)
 
@@ -111,14 +114,15 @@ if __name__ == "__main__":
         run_ds(ds1_settings, threads, stop_event)
         run_dms(dms_settings, threads, stop_event)
         run_dl(light_queue, dl_settings, threads, stop_event)
+        run_db(buzzer_queue, db_settings, threads, stop_event)
 
         run_ultrasonic(dus1_settings, threads, stop_event)
 
         while True:
-            time.sleep(5)
+            time.sleep(4)
 
             concatenated_table = concat_tables(pir_data.pir_table, dht_data.dht_table, hcsr_data.ultrasonic_table)
-            door_table = door_tables(ds_data.ds_table, dms_data.dms_table, dl_data.dl_table)
+            door_table = door_tables(ds_data.ds_table, dms_data.dms_table, dl_data.dl_table, db_data.db_table)
             print(concatenated_table)
             print(door_table)
 
@@ -128,6 +132,7 @@ if __name__ == "__main__":
             dms_data.dms_table.clear_rows()
             ds_data.ds_table.clear_rows()
             dl_data.dl_table.clear_rows()
+            db_data.db_table.clear_rows()
 
 
     except KeyboardInterrupt:
