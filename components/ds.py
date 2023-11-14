@@ -17,7 +17,6 @@ def run_ds(settings, threads, stop_event):
         threads.append(ds_thread)
         print("DS simulator started")
     else:
-        # run_ds_loop ??????????????
         from sensors.ds import run_ds_loop, DS
         print("Starting DS loop")
         ds = DS(settings['name'], settings['pin'])

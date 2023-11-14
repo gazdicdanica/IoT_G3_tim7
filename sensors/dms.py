@@ -28,13 +28,13 @@ class DMS:
             print(characters[3])
         GPIO.output(line, GPIO.LOW)
 
-    def run_dms_loop(self):
-        while True:
-            self.readLine(self.pins[0], ["1","2","3","A"])
-            self.readLine(self.pins[1], ["4","5","6","B"])
-            self.readLine(self.pins[2], ["7","8","9","C"])
-            self.readLine(self.pins[3], ["*","0","#","D"])
-            time.sleep(0.2)
+def run_dms_loop(self):
+    while True:
+        self.readLine(self.pins[0], ["1","2","3","A"])
+        self.readLine(self.pins[1], ["4","5","6","B"])
+        self.readLine(self.pins[2], ["7","8","9","C"])
+        self.readLine(self.pins[3], ["*","0","#","D"])
+        time.sleep(0.2)
 
 
     

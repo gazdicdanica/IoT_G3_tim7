@@ -47,7 +47,7 @@
     "DMS": {
       "name": "DMS",
       "simulated": true,
-      "pins":[]
+      "pins":[20, 21, 8, 7, 1, 12, 13, 19]
     } 
     
   }
