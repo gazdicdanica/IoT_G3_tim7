@@ -35,10 +35,10 @@ class UltrasonicSensor:
         return distance
 
 
-def run_ultrasonic_loop(ultrasonic, delay, callback, stop_event, name):
+def run_ultrasonic_loop(ultrasonic, delay, callback, stop_event, name, runsOn):
     while True:
         distance = ultrasonic.get_distance()
-        callback(distance, name)
+        callback(distance, name, False, runsOn)
         if stop_event.is_set():
             break
         time.sleep(delay)

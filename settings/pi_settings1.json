@@ -2,52 +2,82 @@
     "RDHT1": {
       "name": "RDHT1",
       "simulated": true,
-      "pin": 27
+      "pin": 27,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "RDHT2": {
       "name": "RDHT2",
       "simulated": true,
-      "pin": 17
+      "pin": 17,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "RPIR1": {
       "name": "RPIR1",
       "simulated": true,
-      "pin": 22
+      "pin": 22,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "RPIR2": {
       "name": "RPIR2",
       "simulated": true,
-      "pin": 23
+      "pin": 23,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "DPIR1": {
       "name": "DPIR1",
       "simulated": true,
-      "pin": 24
+      "pin": 24,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "DUS1": {
       "name": "DUS1",
       "simulated": true,
-      "pin": 25
+      "pin": 25,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "DS1": {
       "name": "DS1",
       "simulated": true,
-      "pin":5
+      "pin":5,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "DL": {
       "name": "DL",
       "simulated": true,
-      "pin":6	
+      "pin":6,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "DB": {
       "name": "DB",
       "simulated": true,
-      "pin":16
+      "pin":16,
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     },
     "DMS": {
       "name": "DMS",
       "simulated": true,
-      "pins":[20, 21, 8, 7, 1, 12, 13, 19]
+      "pins":[20, 21, 8, 7, 1, 12, 13, 19],
+      "runsOn": "Pi1",
+      "hostname": "localhost",
+      "port": 1883
     } 
     
   }

@@ -1,21 +1,67 @@
-import time
-import threading
+import time, threading, json
 from sim.pir import run_pir_simulator
+import paho.mqtt.publish as publish
 
 
-def pir_callback(motion_detected, name, table):
+sensor_data_lock = threading.Lock()
+batch = []
+publish_data_counter = 0
+publish_data_limit = 5
+counter_lock = threading.Lock()
+HOSTNAME = ""
+PORT = 0
+
+
+def publisher_task(event, _batch):
+    global publish_data_counter, publish_data_limit
+    while True:
+        event.wait()
+        with counter_lock:
+            local_batch = _batch.copy()
+            publish_data_counter = 0
+            _batch.clear()
+        publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
+        print(f'published pir values')
+        event.clear()
+
+
+publish_event = threading.Event()
+publisher_thread = threading.Thread(target=publisher_task, args=(publish_event, batch,))
+publisher_thread.daemon = True
+publisher_thread.start()
+
+
+def pir_callback(motion_detected, name, simulated, runsOn):
+    global sensor_data_lock, publish_data_counter, publish_data_limit
+
     t = time.localtime()
     t = time.strftime('%H:%M:%S', t)
-    # print("=" * 20 + ">" + name)
-    # print(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
-    # print(f"Motion Detected: {motion_detected}")
-    table.add_row([name, t, motion_detected])
+    data = {
+        "measurement": name,
+        "name": name,
+        "simulated": simulated,
+        "runsOn": runsOn,
+        "values": {
+            "motion_detected": 1.0 if motion_detected else 0.0
+        },
+        "code": 200,
+        "timestamp": t
+    }
+    with counter_lock:
+        batch.append((name, json.dumps(data), 0, True))
+        publish_data_counter += 1
+
+    if publish_data_counter >= publish_data_limit:
+        publish_event.set()
 
 
 def run_pir(settings, threads, stop_event):
+    global HOSTNAME, PORT
+    HOSTNAME = settings['hostname']
+    PORT = settings['port']
     if settings['simulated']:
         print("Starting PIR simulator")
-        pir_thread = threading.Thread(target=run_pir_simulator, args=(4, pir_callback, stop_event, settings['name']))
+        pir_thread = threading.Thread(target=run_pir_simulator, args=(4, pir_callback, stop_event, settings['name'], settings['runsOn']))
         pir_thread.start()
         threads.append(pir_thread)
         print("PIR simulator started")
@@ -23,7 +69,7 @@ def run_pir(settings, threads, stop_event):
         from sensors.pir import run_pir_loop, PIR
         print("Starting PIR loop")
         pir = PIR(settings['pin'])
-        pir_thread = threading.Thread(target=run_pir_loop, args=(pir, 2, pir_callback, stop_event, settings['name']))
+        pir_thread = threading.Thread(target=run_pir_loop, args=(pir, 2, pir_callback, stop_event, settings['name'], settings['runsOn']))
         pir_thread.start()
         threads.append(pir_thread)
         print("PIR loop started")
