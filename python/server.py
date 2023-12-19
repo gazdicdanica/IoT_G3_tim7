@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 
 # InfluxDB Configuration
-token = "S6gcEyq18bCgeoFHjR_qKbprW0gOTMIU4gIWSszDJN7TiT4REjbEa4YRfQY9XGhNLWz7yVZxCPlD16-F8rcVyQ=="
+token = "GLCJTs6_0r7vDXH8QqJ3Yu7kkvvhjgn4fH89E4dl1de38VhXO1ln1cYI13BCTH6-86mPSBF0arD5CRBK6TSG6g=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"
