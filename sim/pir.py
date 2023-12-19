@@ -3,19 +3,15 @@ import random
 from prettytable import PrettyTable
 
 
-pir_table = PrettyTable(["Sensor", "Timestamp", "Motion Detected"])
-
-
 def generate_motion():
     while True:
         yield random.choice([True, False])
 
 
-def run_pir_simulator(delay, callback, stop_event, name):
-    global pir_table
+def run_pir_simulator(delay, callback, stop_event, name, runsOn):
     motion_generator = generate_motion()
     for motion_detected in motion_generator:
         time.sleep(delay)
-        callback(motion_detected, name, pir_table)
+        callback(motion_detected, name, True, runsOn)
         if stop_event.is_set():
             break

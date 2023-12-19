@@ -1,32 +1,76 @@
 from sim.dht11 import run_dht_simulator
-import threading
-import time
+import threading, time, json
+import paho.mqtt.publish as publish
 
 
-def dht_callback(humidity, temperature, code, name, table):
+sensor_data_lock = threading.Lock()
+batch = []
+publish_data_counter = 0
+publish_data_limit = 5
+counter_lock = threading.Lock()
+HOSTNAME = ""
+PORT = 0
+
+
+def publisher_task(event, _batch):
+    global publish_data_counter, publish_data_limit
+    while True:
+        event.wait()
+        with counter_lock:
+            local_batch = _batch.copy()
+            publish_data_counter = 0
+            _batch.clear()
+        publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
+        print(f'published dht values')
+        event.clear()
+
+
+publish_event = threading.Event()
+publisher_thread = threading.Thread(target=publisher_task, args=(publish_event, batch,))
+publisher_thread.daemon = True
+publisher_thread.start()
+
+
+def dht_callback(humidity, temperature, code, name, simulated, runsOn):
+    global sensor_data_lock, publish_data_counter, publish_data_limit
+
     t = time.localtime()
     t = time.strftime('%H:%M:%S', t)
-    # print("="*20+">"+ name)
-    # print(f"=Timestamp: {time.strftime('%H:%M:%S', t)}")
-    # print(f"=Code: {code}")
-    # print(f"=Humidity: {humidity}%")
-    # print(f"=Temperature: {temperature}°C")
-    # print("="*20)
-    table.add_row([name, t, f"{humidity}%", f"{temperature}°C", code])
+    data = {
+        "measurement": name,
+        "name": name,
+        "simulated": simulated,
+        "runsOn": runsOn,
+        "values": {
+            "temperature": temperature,
+            "humidity": humidity,
+        },
+        "code": code,
+        "timestamp": t
+    }
+    with counter_lock:
+        batch.append((name, json.dumps(data), 0, True))
+        publish_data_counter += 1
+
+    if publish_data_counter >= publish_data_limit:
+        publish_event.set()
 
 
 def run_dht(settings, threads, stop_event):
-        if settings['simulated']:
-            print("Starting dht1 sumulator")
-            dht1_thread = threading.Thread(target = run_dht_simulator, args=(4, dht_callback, stop_event, settings['name']))
-            dht1_thread.start()
-            threads.append(dht1_thread)
-            print("Dht1 sumulator started")
-        else:
-            from sensors.dht11 import run_dht_loop, DHT
-            print("Starting dht1 loop")
-            dht = DHT(settings['pin'])
-            dht1_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, settings['name']))
-            dht1_thread.start()
-            threads.append(dht1_thread)
-            print("Dht1 loop started")
+    global HOSTNAME, PORT
+    HOSTNAME = settings['hostname']
+    PORT = settings['port']
+    if settings['simulated']:
+        print("Starting dht1 sumulator")
+        dht1_thread = threading.Thread(target = run_dht_simulator, args=(4, dht_callback, stop_event, settings['name'], settings['runsOn']))
+        dht1_thread.start()
+        threads.append(dht1_thread)
+        print("Dht1 sumulator started")
+    else:
+        from sensors.dht11 import run_dht_loop, DHT
+        print("Starting dht1 loop")
+        dht = DHT(settings['pin'])
+        dht1_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, settings['name'], settings['runsOn']))
+        dht1_thread.start()
+        threads.append(dht1_thread)
+        print("Dht1 loop started")

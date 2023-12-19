@@ -28,7 +28,9 @@ class DMS:
             print(characters[3])
         GPIO.output(line, GPIO.LOW)
 
-def run_dms_loop(self):
+
+# TODO: implement this
+def run_dms_loop(self, delay, callback, stop_event, name, runsOn):
     while True:
         self.readLine(self.pins[0], ["1","2","3","A"])
         self.readLine(self.pins[1], ["4","5","6","B"])

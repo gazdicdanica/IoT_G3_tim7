@@ -1,7 +1,6 @@
 import time
 from prettytable import PrettyTable
 
-dl_table = PrettyTable(["Sensor", "TimeStamp", "Light On"])
 
 light_status = False
 
@@ -10,8 +9,7 @@ def switch_light():
     light_status = not light_status
     
 
-def run_dl_simulator(user_input_queue, delay, callback, stop_event, name):
-    global dl_table
+def run_dl_simulator(user_input_queue, delay, callback, stop_event, name, runsOn):
     global light_status
     
     while True:
@@ -19,7 +17,7 @@ def run_dl_simulator(user_input_queue, delay, callback, stop_event, name):
             user_input = user_input_queue.get()
             if user_input == 'l':
                 switch_light()
-        callback(light_status, name, dl_table)
+        callback(light_status, name, True, runsOn)
 
         if stop_event.is_set():
             break
