@@ -1,5 +1,4 @@
 import time
-from prettytable import PrettyTable
 
 
 light_status = False

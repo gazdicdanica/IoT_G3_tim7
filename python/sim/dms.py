@@ -1,6 +1,5 @@
 import time
 import random
-from prettytable import PrettyTable
 
 
 def generate_door_unlocked():

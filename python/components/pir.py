@@ -21,6 +21,7 @@ def publisher_task(event, _batch):
             publish_data_counter = 0
             _batch.clear()
         publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
+        # print(local_batch)
         print(f'published pir values')
         event.clear()
 
@@ -68,7 +69,7 @@ def run_pir(settings, threads, stop_event):
     else:
         from sensors.pir import run_pir_loop, PIR
         print("Starting PIR loop")
-        pir = PIR(settings['pin'])
+        pir = PIR(settings['name'], settings['pin'])
         pir_thread = threading.Thread(target=run_pir_loop, args=(pir, 2, pir_callback, stop_event, settings['name'], settings['runsOn']))
         pir_thread.start()
         threads.append(pir_thread)
