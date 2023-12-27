@@ -21,6 +21,7 @@ def publisher_task(event, _batch):
             publish_data_counter = 0
             _batch.clear()
         publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
+        # print(local_batch)
         print(f'published dht values')
         event.clear()
 
@@ -69,8 +70,9 @@ def run_dht(settings, threads, stop_event):
     else:
         from sensors.dht11 import run_dht_loop, DHT
         print("Starting dht1 loop")
-        dht = DHT(settings['pin'])
-        dht1_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, settings['name'], settings['runsOn']))
+        print(f"pin: {settings['pin']}")
+        dht = DHT(settings['name'], settings['pin'])
+        dht1_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, settings['runsOn']))
         dht1_thread.start()
         threads.append(dht1_thread)
         print("Dht1 loop started")

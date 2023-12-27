@@ -1,6 +1,5 @@
 import time
 import random
-from prettytable import PrettyTable
 
 
 def generate_values(initial_temp=25, initial_humidity=20):

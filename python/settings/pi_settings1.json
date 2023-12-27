@@ -1,7 +1,7 @@
 {
     "RDHT1": {
       "name": "RDHT1",
-      "simulated": true,
+      "simulated": false,
       "pin": 27,
       "runsOn": "Pi1",
       "hostname": "localhost",
@@ -41,8 +41,9 @@
     },
     "DUS1": {
       "name": "DUS1",
-      "simulated": true,
-      "pin": 25,
+      "simulated": false,
+      "echo_pin": 25,
+      "trigger_pin": 26,
       "runsOn": "Pi1",
       "hostname": "localhost",
       "port": 1883

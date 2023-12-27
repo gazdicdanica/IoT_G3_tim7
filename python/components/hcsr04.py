@@ -21,6 +21,7 @@ def publisher_task(event, _batch):
             publish_data_counter = 0
             _batch.clear()
         publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
+        # print(local_batch)
         print(f'published hcsr values')
         event.clear()
 
