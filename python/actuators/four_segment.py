@@ -26,28 +26,36 @@ class FourSegment:
             GPIO.setup(digit, GPIO.OUT)
             GPIO.output(digit, 1)        
 
+        
 
-    def show_time(self):
-        try:
-            while True:
-                n = time.ctime()[11:13]+time.ctime()[14:16]
-                s = str(n).rjust(4)
-                for digit in range(4):
-                    for loop in range(0,7):
-                        GPIO.output(self.segments[loop], self.num[s[digit]][loop])
-                        if (int(time.ctime()[18:19])%2 == 0) and (digit == 1):
-                            GPIO.output(25, 1)
-                        else:
-                            GPIO.output(25, 0)
-                    GPIO.output(self.digits[digit], 0)
-                    # if wake_up:
-                    #     time.sleep(0.5)
-                    # else:
-                    time.sleep(0.001)
-                    GPIO.output(self.digits[digit], 1)
+def run_display_loop(input_queue, four_segment, stop_event, name, runsOn):
+    try:
+        while True:
+            n = time.ctime()[11:13]+time.ctime()[14:16]
+            s = str(n).rjust(4)
+            for digit in range(4):
+                for loop in range(0,7):
+                    GPIO.output(four_segment.segments[loop], four_segment.num[s[digit]][loop])
+                    if (int(time.ctime()[18:19])%2 == 0) and (digit == 1):
+                        GPIO.output(25, 1)
+                    else:
+                        GPIO.output(25, 0)
+                GPIO.output(four_segment.digits[digit], 0)
+
+                #TODO: budilnik??
+
+                # if input_queue.qsize() > 0:
+                #     input = input_queue.get()
+                #     if input == "morning":
+                #         time.sleep(0.5)
+                    
+                # elif input == "off":
+                time.sleep(0.001)
+                GPIO.output(four_segment.digits[digit], 1)
+            if stop_event.is_set():
+                break
                 
-                
-        finally:
-            GPIO.cleanup()
+    finally:
+        GPIO.cleanup()
 
 

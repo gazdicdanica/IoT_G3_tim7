@@ -13,19 +13,19 @@ PORT = 0
 # def publisher_task(event, _batch):
 
 
-def run_4_segment(settings, threads, stop_event):
+def run_4_segment(input_queue, settings, threads, stop_event):
     if settings["simulated"]:
-        print("Starting 4D7S Display simulator")
-        four_segment_thread = threading.Thread(target=run_4_segment_simulator, args=(60, stop_event, settings['name'], settings['runsOn']))
+        print("Starting B4SD simulator")
+        four_segment_thread = threading.Thread(target=run_4_segment_simulator, args=(input_queue, 60, stop_event, settings['name'], settings['runsOn']))
         four_segment_thread.start()
         threads.append(four_segment_thread)
-        print("4D7S Display simulator started")
+        print("B4SD simulator started")
     else:
         from actuators.four_segment import FourSegment
-        print("Starting 4D7S Display loop")
+        print("Starting B4SD loop")
         four_segment = FourSegment(settings['name'], settings['segments'], settings['digits'])
-        four_thread = threading.Thread(target=four_segment.show_time)
+        four_thread = threading.Thread(target=four_segment.show_time, args=(input_queue, four_segment, stop_event, settings['name'], settings['runsOn']))
         four_thread.start()
         threads.append(four_thread)
-        print("4D7S Display loop started")
+        print("B4SD loop started")
 

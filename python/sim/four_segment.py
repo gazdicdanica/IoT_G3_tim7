@@ -8,7 +8,9 @@ def get_time():
         yield f"{current_hour}:{current_minute}"
 
 
-def run_4_segment_simulator(delay, callback, stop_event, name, runsOn):
+def run_4_segment_simulator(input_queue, delay, stop_event, name, runsOn):
+    #TODO: budilnik 
+
     time_generator = get_time()
     for t in time_generator:
         print(f"Current time - {t}")

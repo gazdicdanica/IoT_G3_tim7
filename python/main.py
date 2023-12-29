@@ -8,6 +8,7 @@ from components.hcsr04 import run_ultrasonic
 from components.ds import run_ds
 from components.dms import run_dms
 from components.db import run_db
+from components.four_segment import run_4_segment
 from queue import Queue
 import paho.mqtt.publish as publish
 
@@ -79,6 +80,9 @@ def run_all_ultrasonic(threads, stop_event):
     run_ultrasonic(settings['DUS1'], threads, stop_event)
     run_ultrasonic(settings['DUS2'], threads, stop_event)
 
+def run_display(threads, stop_event):
+    run_4_segment(settings["B4SD"], threads, stop_event)
+
 
 if __name__ == "__main__":
     print("*** G3 Tim7 ***")
@@ -95,6 +99,7 @@ if __name__ == "__main__":
         run_all_pir(threads, stop_event)
         run_all_buttons(threads, stop_event)
         run_all_ultrasonic(threads, stop_event)
+        run_display(threads, stop_event)
         
 
         while True:

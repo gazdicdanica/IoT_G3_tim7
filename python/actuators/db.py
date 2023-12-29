@@ -20,7 +20,7 @@ def run_db_loop(input_queue, db, delay, callback, stop_event, name, runsOn):
     while True:
         if input_queue.qsize() > 0:
             user_input = input_queue.get()
-            if user_input == 'b':
+            if user_input == 'z':
                 if db.is_buzzer_on():
                     db.turn_off()
                     callback(False, name, False, runsOn)
