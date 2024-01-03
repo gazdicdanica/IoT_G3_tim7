@@ -176,5 +176,13 @@
       "runsOn": "Pi3",
       "hostname": "localhost",
       "port": 1883
+    },
+    "BIR": {
+      "name": "BIR",
+      "simulated": true,
+      "pin": 26,
+      "runsOn": "Pi3",
+      "hostname": "localhost",
+      "port": 1883
     }
   }
