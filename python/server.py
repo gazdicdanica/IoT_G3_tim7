@@ -134,7 +134,7 @@ def write_to_db(data):
         point.field(field_name, field_value)
     point.field("timestamp", data["timestamp"])
 
-    # write_api.write(bucket=bucket, org=org, record=point)
+    write_api.write(bucket=bucket, org=org, record=point)
     
 
 mqtt_client.on_connect = on_connect
