@@ -8,6 +8,9 @@ from components.hcsr04 import run_ultrasonic
 from components.ds import run_ds
 from components.dms import run_dms
 from components.db import run_db
+from components.four_segment import run_4_segment
+from components.rgb import run_rgb
+from components.ir import run_ir
 from components.LCD import run_lcd_loop
 from components.MPU6050.gyro import run_gyro
 from queue import Queue
@@ -22,6 +25,7 @@ except:
 
 light_queue = Queue()
 buzzer_queue = Queue()
+rgb_queue = Queue()
 settings = {}
 
 def run_user_input_threads(threads, stop_event):
@@ -33,6 +37,7 @@ def run_user_input_threads(threads, stop_event):
 def user_input_thread(stop_event):
     global light_queue
     global buzzer_queue
+    global rgb_queue
 
     while True:
         user_input = input()
@@ -40,6 +45,8 @@ def user_input_thread(stop_event):
             light_queue.put(user_input)
         if user_input == 'b':
             buzzer_queue.put(user_input)
+        else: 
+            rgb_queue.put(user_input)
         time.sleep(0.1)
         if stop_event.is_set():
             break
@@ -81,6 +88,11 @@ def run_all_ultrasonic(threads, stop_event):
     run_ultrasonic(settings['DUS1'], threads, stop_event)
     run_ultrasonic(settings['DUS2'], threads, stop_event)
 
+def run_display(threads, stop_event):
+    run_4_segment(settings["B4SD"], threads, stop_event)
+    run_rgb(light_queue, settings["BRGB"], threads, stop_event)
+    run_ir(settings["BIR"], threads, stop_event)
+
 
 def run_lcd(threads, stop_event):
     run_lcd_loop(settings['LCD'], threads, stop_event)
@@ -107,6 +119,7 @@ if __name__ == "__main__":
         # run_all_ultrasonic(threads, stop_event)
         # run_lcd(threads, stop_event)
         run_all_gyro(threads, stop_event)
+        run_display(threads, stop_event)
 
         while True:
             time.sleep(5)

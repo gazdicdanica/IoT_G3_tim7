@@ -80,6 +80,9 @@
       "hostname": "localhost",
       "port": 1883
     },
+
+    
+
     "RDHT3": {
       "name": "RDHT3",
       "simulated": true,
@@ -150,6 +153,9 @@
       "port": 1883,
       "address": "0x68"
     },
+  
+  
+  
     "RPIR4": {
       "name": "RPIR4",
       "simulated": true,
@@ -170,6 +176,33 @@
       "name": "BB",
       "simulated": true,
       "pin":16,
+      "runsOn": "Pi3",
+      "hostname": "localhost",
+      "port": 1883
+    },
+    "B4SD": {
+      "name": "B4SD",
+      "simulated": true,
+      "segments": [11, 4, 23, 8, 7, 10, 18, 25],
+      "digits": [14, 15, 17, 24],
+      "runsOn": "Pi3",
+      "hostname": "localhost",
+      "port": 1883
+    },
+    "BRGB": {
+      "name": "BRGB",
+      "simulated": true,
+      "R_pin": 12,
+      "G_pin": 13,
+      "B_pin": 19,
+      "runsOn": "Pi3",
+      "hostname": "localhost",
+      "port": 1883
+    },
+    "BIR": {
+      "name": "BIR",
+      "simulated": true,
+      "pin": 26,
       "runsOn": "Pi3",
       "hostname": "localhost",
       "port": 1883
