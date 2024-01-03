@@ -21,10 +21,10 @@ def run_4_segment(input_queue, settings, threads, stop_event):
         threads.append(four_segment_thread)
         print("B4SD simulator started")
     else:
-        from actuators.four_segment import FourSegment
+        from actuators.four_segment import run_display_loop,FourSegment
         print("Starting B4SD loop")
         four_segment = FourSegment(settings['name'], settings['segments'], settings['digits'])
-        four_thread = threading.Thread(target=four_segment.show_time, args=(input_queue, four_segment, stop_event, settings['name'], settings['runsOn']))
+        four_thread = threading.Thread(target=run_display_loop, args=(four_segment, stop_event, settings['name'], settings['runsOn']))
         four_thread.start()
         threads.append(four_thread)
         print("B4SD loop started")

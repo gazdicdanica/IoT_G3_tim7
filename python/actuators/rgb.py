@@ -5,6 +5,7 @@ import time
 class RGB:
     def __init__(self, name, r_pin, g_pin, b_pin) -> None:
         self.name = name
+        self.isOn = False
         self.R_pin = r_pin
         self.G_pin = g_pin
         self.B_pin = b_pin
@@ -15,8 +16,12 @@ class RGB:
         GPIO.setup(self.G_pin, GPIO.OUT)
         GPIO.setup(self.B_pin, GPIO.OUT)
 
+    def turn_on(self):
+        self.isOn = True
+        self.white()
 
     def turn_off(self):
+        self.isOn = False
         GPIO.output(self.R_pin, GPIO.LOW)
         GPIO.output(self.G_pin, GPIO.LOW)
         GPIO.output(self.B_pin, GPIO.LOW)
@@ -62,30 +67,25 @@ def run_rgb_loop(input_queue, rgb, delay, stop_event, name, runsOn):
         if input_queue.qsize() > 0:
             user_input = input_queue.get()
             if user_input == "x":
-                rgb.turn_off()
+                if rgb.isOn:
+                    rgb.turn_off()
+                else:
+                    rgb.turn_on()
                 #TODO: da li treba callback?
-                # callback(False, name, False, runsOn)
             elif user_input == "w":
                 rgb.white()
-                # callback(False, name, False, runsOn)
             elif user_input == "r":
                 rgb.red()
-                # callback(False, name, False, runsOn)
             elif user_input == "g":
                 rgb.green()
-                # callback(False, name, False, runsOn)
             elif user_input == "b":
                 rgb.blue()
-                # callback(False, name, False, runsOn)
             elif user_input == "y":
                 rgb.yellow()
-                # callback(False, name, False, runsOn)
             elif user_input == "p":
                 rgb.purple()
-                # callback(False, name, False, runsOn)
             elif user_input == "lb":
                 rgb.light_blue()
-                # callback(False, name, False, runsOn)
         if stop_event.is_set():
             break
         time.sleep(delay)

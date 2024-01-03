@@ -28,7 +28,7 @@ class FourSegment:
 
         
 
-def run_display_loop(input_queue, four_segment, stop_event, name, runsOn):
+def run_display_loop(four_segment, stop_event, name, runsOn):
     try:
         while True:
             n = time.ctime()[11:13]+time.ctime()[14:16]
