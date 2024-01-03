@@ -11,7 +11,7 @@ from components.db import run_db
 from components.four_segment import run_4_segment
 from components.rgb import run_rgb
 from components.ir import run_ir
-from components.LCD import run_lcd_loop
+# from components.LCD import run_lcd_loop
 # from components.MPU6050.gyro import run_gyro
 from queue import Queue
 import paho.mqtt.publish as publish
@@ -92,10 +92,7 @@ def run_display(threads, stop_event):
     run_4_segment(settings["B4SD"], threads, stop_event)
     run_rgb(light_queue, settings["BRGB"], threads, stop_event)
     run_ir(settings["BIR"], threads, stop_event)
-
-
-def run_lcd(threads, stop_event):
-    run_lcd_loop(settings['GLCD'], threads, stop_event)
+    # run_lcd_loop(settings['GLCD'], threads, stop_event)
 
 
 def run_all_gyro(threads, stop_event):
@@ -118,7 +115,6 @@ if __name__ == "__main__":
         run_all_pir(threads, stop_event)
         run_all_buttons(threads, stop_event)
         run_all_ultrasonic(threads, stop_event)
-        run_lcd(threads, stop_event)
         run_all_gyro(threads, stop_event)
         run_display(threads, stop_event)
 

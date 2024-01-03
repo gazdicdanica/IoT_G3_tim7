@@ -16,9 +16,14 @@ class DoorLight:
     def is_light_on(self):
         return GPIO.input(self.pin) == GPIO.HIGH
     
-def run_dl_loop(input_queue, dl, delay, callback, stop_event, name, runsOn):
+def run_dl_loop(should_turn_on, input_queue, dl, delay, callback, stop_event, name, runsOn):
     while True:
-        if input_queue.qsize() > 0:
+        if should_turn_on.qsize() > 0:
+            motion_detected = should_turn_on.get()
+            if motion_detected:
+                dl.turn_on()
+                callback(True, name, False, runsOn)
+        elif input_queue.qsize() > 0:
             user_input = input_queue.get()
             if user_input == 'l':
                 if dl.is_light_on():
@@ -29,4 +34,8 @@ def run_dl_loop(input_queue, dl, delay, callback, stop_event, name, runsOn):
                     callback(True, name, False, runsOn)
         if stop_event.is_set():
             break
-        time.sleep(delay)
+        if motion_detected:
+            motion_detected = False
+            time.sleep(10)
+        else:
+            time.sleep(delay)

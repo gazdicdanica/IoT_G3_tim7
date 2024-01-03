@@ -62,7 +62,7 @@ def run_pir(settings, threads, stop_event):
     PORT = settings['port']
     if settings['simulated']:
         print("Starting PIR simulator")
-        pir_thread = threading.Thread(target=run_pir_simulator, args=(4, pir_callback, stop_event, settings['name'], settings['runsOn']))
+        pir_thread = threading.Thread(target=run_pir_simulator, args=(3, pir_callback, stop_event, settings['name'], settings['runsOn']))
         pir_thread.start()
         threads.append(pir_thread)
         print("PIR simulator started")
