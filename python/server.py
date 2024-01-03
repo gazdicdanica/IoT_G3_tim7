@@ -9,18 +9,22 @@ app = Flask(__name__)
 
 
 # InfluxDB Configuration
-token = "GLCJTs6_0r7vDXH8QqJ3Yu7kkvvhjgn4fH89E4dl1de38VhXO1ln1cYI13BCTH6-86mPSBF0arD5CRBK6TSG6g=="
+token = "PssPnJLkhVs4v7i8wrjq_k_ve58B-4Tmc8IyAwurIZiFktRammEp-AiIBkdAwWXzb-qEevGPqyZycFCw16txCw=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"
 influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
 mqtt_client = mqtt.Client()
-mqtt_client.connect("localhost", 1883, 60)
+mqtt_client.connect("localhost", 1883, keepalive=65535)
 mqtt_client.loop_start()
 
 
+g_temp = []
+g_humidity = []
+
 def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
     client.subscribe("RDHT1")
     client.subscribe("RDHT2")
     client.subscribe("RDHT3")
@@ -55,38 +59,45 @@ def on_message(client, userdata, msg):
 
 
 def send_message(topic, message):
+    # print("Sending message: ", message, topic)
     publish.single(topic, message, hostname="localhost", port=1883)
 
 
 def parse_data(data, topic=None):
     if topic == "GDHT":
-        send_message("GDHT_Data", parse_gdht(data))
+        msg = parse_gdht(data)
+        if msg:
+            send_message("GDHT_Data", msg)
     
     write_to_db(data)
 
 
 def parse_gdht(data):
-    temp_sum = 0
-    temp_count = 0
-    humidity_sum = 0
-    humd_count = 0
-    for dht in data["values"]:
-        if dht["temperature"] > -40 and dht["temperature"] < 50 and dht["humidity"] > 0 and dht["humidity"] < 100:
-            temp_sum += dht["temperature"]
-            humidity_sum += dht["humidity"]
-            temp_count += 1
-            humd_count += 1
-    if humd_count == 0:
-        humd_count = 1
-        temp_count = 1
-    return json.dumps({
-        "temperature": round(temp_sum/temp_count, 1),
-        "humidity": round(humidity_sum/humd_count, 1),
-    })
+    global g_temp, g_humidity
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+
+        temperature = values.get('temperature', 0)
+        humidity = values.get('humidity', 0)
+        if -20 < temperature < 50 and 0 < humidity < 100:
+            g_temp.append(temperature)
+            g_humidity.append(humidity)
+    except:
+        print("Error decoding JSON data")
+        return json.dumps({"temperature": 0, "humidity": 0})
+    if len(g_temp) >= 10:
+        average_temperature = round(sum(g_temp) / len(g_temp),1)
+        average_humidity = round(sum(g_humidity) / len(g_humidity),1)
+        g_temp = []
+        g_humidity = []
+        return json.dumps({"temperature": average_temperature, "humidity": average_humidity})
+
 
 
 def write_to_db(data):
-    print(data)
+    # print(data)
     write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
     point = (
         Point(data["measurement"])
