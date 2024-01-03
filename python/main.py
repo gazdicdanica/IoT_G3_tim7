@@ -8,6 +8,8 @@ from components.hcsr04 import run_ultrasonic
 from components.ds import run_ds
 from components.dms import run_dms
 from components.db import run_db
+from components.LCD import run_lcd_loop
+from components.MPU6050.gyro import run_gyro
 from queue import Queue
 import paho.mqtt.publish as publish
 
@@ -80,6 +82,14 @@ def run_all_ultrasonic(threads, stop_event):
     run_ultrasonic(settings['DUS2'], threads, stop_event)
 
 
+def run_lcd(threads, stop_event):
+    run_lcd_loop(settings['LCD'], threads, stop_event)
+
+
+def run_all_gyro(threads, stop_event):
+    run_gyro(settings['GSG'], threads, stop_event)
+
+
 if __name__ == "__main__":
     print("*** G3 Tim7 ***")
     threads = []
@@ -91,11 +101,12 @@ if __name__ == "__main__":
 
         run_user_input_threads(threads, stop_event)
 
-        run_all_dht(threads, stop_event)
-        run_all_pir(threads, stop_event)
-        run_all_buttons(threads, stop_event)
-        run_all_ultrasonic(threads, stop_event)
-        
+        # run_all_dht(threads, stop_event)
+        # run_all_pir(threads, stop_event)
+        # run_all_buttons(threads, stop_event)
+        # run_all_ultrasonic(threads, stop_event)
+        # run_lcd(threads, stop_event)
+        run_all_gyro(threads, stop_event)
 
         while True:
             time.sleep(5)
