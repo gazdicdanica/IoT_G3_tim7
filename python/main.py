@@ -11,7 +11,7 @@ from components.db import run_db
 from components.four_segment import run_4_segment
 from components.rgb import run_rgb
 from components.ir import run_ir
-from components.LCD import run_lcd_loop
+# from components.LCD import run_lcd_loop
 # from components.MPU6050.gyro import run_gyro
 from queue import Queue
 import paho.mqtt.publish as publish
@@ -67,21 +67,21 @@ def run_all_dht(threads, stop_event):
 
 
 def run_all_pir(threads, stop_event):
-    run_pir(settings['RPIR1'], threads, stop_event)
-    run_pir(settings['RPIR2'], threads, stop_event)
+    # run_pir(settings['RPIR1'], threads, stop_event)
+    # run_pir(settings['RPIR2'], threads, stop_event)
     run_pir(settings['DPIR1'], threads, stop_event)
-    run_pir(settings['RPIR3'], threads, stop_event)
-    run_pir(settings['DPIR2'], threads, stop_event)
-    run_pir(settings['RPIR4'], threads, stop_event)
+    # run_pir(settings['RPIR3'], threads, stop_event)
+    # run_pir(settings['DPIR2'], threads, stop_event)
+    # run_pir(settings['RPIR4'], threads, stop_event)
 
 
 def run_all_buttons(threads, stop_event):
-    run_ds(settings['DS1'], threads, stop_event)
-    run_dms(settings['DMS'], threads, stop_event)
+    # run_ds(settings['DS1'], threads, stop_event)
+    # run_dms(settings['DMS'], threads, stop_event)
     run_dl(light_queue, settings['DL'], threads, stop_event)
-    run_db(buzzer_queue, settings['DB'], threads, stop_event)
-    run_ds(settings['DS2'], threads, stop_event)
-    run_db(buzzer_queue, settings['BB'], threads, stop_event)
+    # run_db(buzzer_queue, settings['DB'], threads, stop_event)
+    # run_ds(settings['DS2'], threads, stop_event)
+    # run_db(buzzer_queue, settings['BB'], threads, stop_event)
            
 
 def run_all_ultrasonic(threads, stop_event):
@@ -92,10 +92,7 @@ def run_display(threads, stop_event):
     run_4_segment(settings["B4SD"], threads, stop_event)
     run_rgb(light_queue, settings["BRGB"], threads, stop_event)
     run_ir(settings["BIR"], threads, stop_event)
-
-
-def run_lcd(threads, stop_event):
-    run_lcd_loop(settings['GLCD'], threads, stop_event)
+    # run_lcd_loop(settings['GLCD'], threads, stop_event)
 
 
 def run_all_gyro(threads, stop_event):
@@ -114,13 +111,12 @@ if __name__ == "__main__":
 
         run_user_input_threads(threads, stop_event)
 
-        run_all_dht(threads, stop_event)
+        # run_all_dht(threads, stop_event)
         run_all_pir(threads, stop_event)
         run_all_buttons(threads, stop_event)
-        run_all_ultrasonic(threads, stop_event)
-        run_lcd(threads, stop_event)
-        run_all_gyro(threads, stop_event)
-        run_display(threads, stop_event)
+        # run_all_ultrasonic(threads, stop_event)
+        # run_all_gyro(threads, stop_event)
+        # run_display(threads, stop_event)
 
         while True:
             time.sleep(5)

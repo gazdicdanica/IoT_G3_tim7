@@ -1,6 +1,8 @@
+from queue import Queue
 from sim.dl import run_dl_simulator
 import threading, time, json
 import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 
 sensor_data_lock = threading.Lock()
@@ -10,6 +12,20 @@ publish_data_limit = 5
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+should_turn_on = Queue()
+mqtt_client = mqtt.Client()
+
+
+def on_connect(client, userdata, flags, rc):
+    print("DL connected")
+    client.subscribe("DL_Data")
+
+
+def on_message(client, userdata, msg):
+    global should_turn_on
+    data = json.loads(msg.payload.decode('utf-8'))
+    print(data)
+    should_turn_on.put(data["motion_detected"] == 1)
 
 
 def publisher_task(event, _batch):
@@ -55,12 +71,16 @@ def dl_callback(light_on, name, simulated, runsOn):
 
 
 def run_dl(user_input_queue, settings, threads, stop_event):
-    global HOSTNAME, PORT
+    global HOSTNAME, PORT, should_turn_on, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
     if settings["simulated"]:
         print("Starting DL simulator")
-        dl_thread = threading.Thread(target=run_dl_simulator, args=(user_input_queue, 4, dl_callback, stop_event, settings['name'], settings['runsOn']))
+        dl_thread = threading.Thread(target=run_dl_simulator, args=(should_turn_on, user_input_queue, 4, dl_callback, stop_event, settings['name'], settings['runsOn']))
         dl_thread.start()
         threads.append(dl_thread)
         print("DL simulator started")
@@ -68,7 +88,7 @@ def run_dl(user_input_queue, settings, threads, stop_event):
         from actuators.dl import run_dl_loop, DL
         print("Starting DL loop")
         dl = DL(settings['name'], settings['pin'])
-        dl_thread = threading.Thread(target=run_dl_loop, args=(user_input_queue, dl, 2, dl_callback, stop_event, settings['name'], settings['runsOn']))
+        dl_thread = threading.Thread(target=run_dl_loop, args=(should_turn_on, user_input_queue, dl, 2, dl_callback, stop_event, settings['name'], settings['runsOn']))
         dl_thread.start()
         threads.append(dl_thread)
         print("DL loop started")

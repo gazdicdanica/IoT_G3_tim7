@@ -9,19 +9,21 @@ app = Flask(__name__)
 
 
 # InfluxDB Configuration
-token = "PssPnJLkhVs4v7i8wrjq_k_ve58B-4Tmc8IyAwurIZiFktRammEp-AiIBkdAwWXzb-qEevGPqyZycFCw16txCw=="
+token = "cE7Ju58CY7uIwggkfIfQUp2-sc5W_4OmyVdpbR4EMAqWmo0MlxnPCL9ucxUjieP3074fNm6N3vtRSipaefWm4Q=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"
 influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
 mqtt_client = mqtt.Client()
-mqtt_client.connect("localhost", 1883, keepalive=65535)
+mqtt_client.connect("localhost", 1883)
 mqtt_client.loop_start()
 
 
 g_temp = []
 g_humidity = []
+dpir1_motion_data = []
+dpir1_treshold_percentage = 50
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -59,7 +61,7 @@ def on_message(client, userdata, msg):
 
 
 def send_message(topic, message):
-    # print("Sending message: ", message, topic)
+    print("Sending message: ", message, topic)
     publish.single(topic, message, hostname="localhost", port=1883)
 
 
@@ -68,9 +70,31 @@ def parse_data(data, topic=None):
         msg = parse_gdht(data)
         if msg:
             send_message("GDHT_Data", msg)
-    
+    elif topic == "DPIR1":
+        if parse_pir(data):
+            send_message("DL_Data", json.dumps({"motion_detected": 1}))
+
     write_to_db(data)
 
+
+def parse_pir(data):
+    global dpir1_motion_data, dpir1_treshold_percentage
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+        motion_detected = values.get('motion_detected', 0)
+        dpir1_motion_data.append(motion_detected)
+    except:
+        print("Error decoding JSON data")
+    print(dpir1_motion_data)
+    if len(dpir1_motion_data) >= 10:
+        truthy_count = dpir1_motion_data.count(1)
+        total_count = len(dpir1_motion_data)
+        percentage_truthy = (truthy_count / total_count) * 100
+        dpir1_motion_data = []
+        return percentage_truthy >= dpir1_treshold_percentage
+    
 
 def parse_gdht(data):
     global g_temp, g_humidity
@@ -97,7 +121,7 @@ def parse_gdht(data):
 
 
 def write_to_db(data):
-    # print(data)
+    print(data)
     write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
     point = (
         Point(data["measurement"])
@@ -110,7 +134,7 @@ def write_to_db(data):
         point.field(field_name, field_value)
     point.field("timestamp", data["timestamp"])
 
-    write_api.write(bucket=bucket, org=org, record=point)
+    # write_api.write(bucket=bucket, org=org, record=point)
     
 
 mqtt_client.on_connect = on_connect
