@@ -124,6 +124,16 @@
       "hostname": "localhost",
       "port": 1883
     },
+    "GLCD": {
+      "name": "GLCD",
+      "sda_pin": 2,
+      "scl_pin": 3,
+      "simulated": true,
+      "runsOn": "Pi2",
+      "hostname": "localhost",
+      "port": 1883,
+      "address": "0x27"
+    },
     "DS2": {
       "name": "DS2",
       "simulated": true,
@@ -132,8 +142,20 @@
       "hostname": "localhost",
       "port": 1883
     },
-
-
+    "GSG": {
+      "name": "GSG",
+      "simulated": true,
+      "sda_pin": 2,
+      "scl_pin": 3,
+      "pin":6,
+      "runsOn": "Pi2",
+      "hostname": "localhost",
+      "port": 1883,
+      "address": "0x68"
+    },
+  
+  
+  
     "RPIR4": {
       "name": "RPIR4",
       "simulated": true,
