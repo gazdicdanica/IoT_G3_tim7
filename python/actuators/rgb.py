@@ -5,7 +5,6 @@ import time
 class RGB:
     def __init__(self, name, r_pin, g_pin, b_pin) -> None:
         self.name = name
-        self.isOn = False
         self.R_pin = r_pin
         self.G_pin = g_pin
         self.B_pin = b_pin
@@ -61,16 +60,12 @@ class RGB:
         GPIO.output(self.G_pin, GPIO.HIGH)
         GPIO.output(self.B_pin, GPIO.HIGH)
 
-
 def run_rgb_loop(input_queue, rgb, delay, stop_event, name, runsOn):
     while True:
         if input_queue.qsize() > 0:
             user_input = input_queue.get()
             if user_input == "x":
-                if rgb.isOn:
-                    rgb.turn_off()
-                else:
-                    rgb.turn_on()
+                rgb.turn_off()
                 #TODO: da li treba callback?
             elif user_input == "w":
                 rgb.white()
