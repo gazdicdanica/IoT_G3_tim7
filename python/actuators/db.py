@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO
 import time
+from queue import Queue
+
 
 class DoorBuzzer:
     def __init__(self, name, pin):
@@ -16,8 +18,15 @@ class DoorBuzzer:
     def is_buzzer_on(self):
         return GPIO.input(self.pin) == GPIO.HIGH
     
-def run_db_loop(should_turn_on, input_queue, db, delay, callback, stop_event, name, runsOn):
+def run_db_loop(should_turn_on_db, should_turn_on_bb, input_queue, db, delay, callback, stop_event, name, runsOn):
     alarm_on = False
+    should_turn_on = Queue()
+    if name == "DB":
+        print("Starting DB simulator")
+        should_turn_on = should_turn_on_db
+    elif name == "BB":
+        print("Starting BB simulator")
+        should_turn_on = should_turn_on_bb
     while True:
         if should_turn_on.qsize() > 0:
             alarm_on = should_turn_on.get()
