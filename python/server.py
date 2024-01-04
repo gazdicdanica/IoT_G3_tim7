@@ -1,15 +1,17 @@
-from flask import Flask
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
 import json, time, threading
 import paho.mqtt.publish as publish
+import datetime
 
 app = Flask(__name__)
-
+CORS(app)
 
 # InfluxDB Configuration
-token = "bUPw1mjp7_UNgQlnsq5hWX-DctyJvjjT2ocDpqEGrKPewvJrb7GG_dWWc0TCTtXpZRxipJSK0HtIQEr2I9a2Ww=="
+token = "SvsngmuRMMNRO0MCUg6Vd47SFz7sLQ6WLlj5GAFFumVke0KnFOo5FFxYfM1n_IMiDY9DdIpH8Nz0GZ3Xr3qHRg=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"
@@ -244,9 +246,36 @@ mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
 
+def to_time(date_string): 
+    try:
+        return datetime.datetime.strptime(date_string, "%H:%M").time()
+    except ValueError:
+        raise ValueError('{} is not valid time in the format HH:mm'.format(date_string))
+
+
+
 @app.route('/')
 def hello():
     return 'Hello, World!'
+
+
+@app.route('/api/set_wakeup_time', methods=['GET'])
+def set_wakeup_time():
+    try:
+        time = to_time(request.args.get('time'))
+        print(f"Setting wakeup time to {time}")
+        send_message("wake_up_data", json.dumps({"alarm_time": str(time), "turn_off": str(False)}))
+        return jsonify({}), 200
+    except ValueError as ex:
+        return jsonify({'error': str(ex)}), 400 
+    
+@app.route('/api/turn_off_alarm', methods=['GET'])
+def turn_off_alarm():
+    try:
+        send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
+        return jsonify({}), 200
+    except ValueError as ex:
+        return jsonify({'error': str(ex)}), 400
 
 
 if __name__ == '__main__':
