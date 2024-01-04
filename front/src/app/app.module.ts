@@ -10,6 +10,7 @@ import { MaterialModule } from 'src/infrastructure/material/material.module';
 import { RgbComponent } from './rgb/rgb.component';
 import { ClockComponent } from './clock/clock.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { WakeUpComponent } from './wake-up/wake-up.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     DhtComponent,
     HomeComponent,
     RgbComponent,
-    ClockComponent
+    ClockComponent,
+    WakeUpComponent
   ],
   imports: [
     BrowserModule,
