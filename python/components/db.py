@@ -1,6 +1,8 @@
 from sim.db import run_buzzer_simulator
 import threading, time, json
 import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
+from queue import Queue
 
 
 sensor_data_lock = threading.Lock()
@@ -10,6 +12,22 @@ publish_data_limit = 5
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+should_turn_on_bb = Queue()
+should_turn_on_db = Queue()
+mqtt_client = mqtt.Client()
+
+
+def on_connect(client, userdata, flags, rc):
+    print("Buzzer connected")
+    client.subscribe("ALARM")
+
+
+def on_message(client, userdata, msg):
+    global should_turn_on
+    data = json.loads(msg.payload.decode('utf-8'))
+    print(data)
+    should_turn_on_bb.put(data["alarm"] == 1)
+    should_turn_on_db.put(data["alarm"] == 1)
 
 
 def publisher_task(event, _batch):
@@ -55,20 +73,22 @@ def db_callback(buzzer_on, name, simulated, runsOn):
 
 
 def run_db(user_input_queue, settings, threads, stop_event):
-    global HOSTNAME, PORT
+    global HOSTNAME, PORT, should_turn_on_bb, should_turn_on_db, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
     if settings["simulated"]:
-        print("Starting DB simulator")
-        db_thread = threading.Thread(target=run_buzzer_simulator, args=(user_input_queue, 4, db_callback, stop_event, settings['name'], settings['runsOn']))
+        db_thread = threading.Thread(target=run_buzzer_simulator, args=(should_turn_on_db, should_turn_on_bb, user_input_queue, 4, db_callback, stop_event, settings['name'], settings['runsOn']))
         db_thread.start()
         threads.append(db_thread)
-        print("DB simulator started")
     else:
         from actuators.db import run_db_loop, DoorBuzzer
         print("Starting DB loop")
         db = DoorBuzzer(settings['name'], settings['pin'])
-        db_thread = threading.Thread(target=run_db_loop, args=(user_input_queue, db, 2, db_callback, stop_event, settings['name'], settings['runsOn']))
+        db_thread = threading.Thread(target=run_db_loop, args=(should_turn_on_db, should_turn_on_bb, user_input_queue, db, 2, db_callback, stop_event, settings['name'], settings['runsOn']))
         db_thread.start()
         threads.append(db_thread)
         print("DB loop started")
