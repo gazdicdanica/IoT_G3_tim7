@@ -74,7 +74,7 @@ def gyro_callback(accel, gyro, code, name, simulated, runsOn):
 
 
 def notify_significant_change(name, runsOn, simulated):
-    publish.single("GYRO_ALERT", json.dumps({
+    publish.single("ALERT", json.dumps({
         "name": name,
         "runsOn": runsOn,
         "simulated": simulated,
@@ -94,7 +94,7 @@ def run_gyro(settings, threads, stop_event):
         print("Started simulated gyro")
     else:
         from sensors.gyro.gyro import run_gyro_loop
-        print("Starting dht1 loop")
+        print("Starting gyro loop")
         mpu = MPU6050.MPU6050()     #instantiate a MPU6050 class object
         accel = [0]*3               #store accelerometer data
         gyro = [0]*3                #store gyroscope data
