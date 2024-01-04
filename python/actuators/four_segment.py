@@ -30,7 +30,7 @@ class FourSegment:
 
         
 
-def run_display_loop(alarm_queue, turn_off_queue, four_segment, stop_event, name, runsOn):
+def run_display_loop(alarm_queue, turn_off_queue, delay, four_segment, stop_event, name, runsOn):
     try:
         while True:
             if alarm_queue.qsize() > 0:
@@ -38,7 +38,6 @@ def run_display_loop(alarm_queue, turn_off_queue, four_segment, stop_event, name
                 four_segment.alarm = alarm
             if turn_off_queue.qsize() > 0:
                 four_segment.alarm_on = False
-                
             current = datetime.datetime.now().replace(second=0)
             display_time = current.strftime("%H:%M:%S")
             if display_time == four_segment.alarm:
@@ -60,6 +59,7 @@ def run_display_loop(alarm_queue, turn_off_queue, four_segment, stop_event, name
                 GPIO.output(four_segment.digits[digit], 1)
             if stop_event.is_set():
                 break
+            time.sleep(delay)
                 
     finally:
         GPIO.cleanup()

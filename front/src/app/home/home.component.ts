@@ -24,7 +24,9 @@ export class HomeComponent {
   }
 
   openClockDialog(){
+    this.dialogConfig.width = '35%';
     this.dialog.open(ClockComponent, this.dialogConfig);
+    this.dialogConfig.width = '30%';
 
   }
 
