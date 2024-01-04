@@ -1,0 +1,183 @@
+.wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 100vh;
+}
+
+/* .col{
+    width: 25%;
+    aspect-ratio: 1/1;
+    border: 1px solid #9b27b022;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.col:hover{
+    background-color:#9b27b034;
+    cursor: pointer;
+} */
+
+.wrapper img{
+    height: 100vh;
+}
+
+.dot{
+    width: 15px;
+    aspect-ratio: 1/1;
+    position: absolute;
+    z-index: 1;
+}
+
+.pi1{
+    background-color: pink;
+}
+
+.pi1:hover{
+    background-color: palevioletred;
+    cursor: pointer;
+}
+
+.pi2{
+    background-color: palegreen;
+}
+
+.pi2:hover{
+    background-color: limegreen;
+    cursor: pointer;
+}
+
+.pi3{
+    background-color: skyblue;
+}
+
+.pi3:hover{
+    background-color: deepskyblue;
+    cursor: pointer;
+
+}
+
+#dl{
+    bottom: 142px;
+    left: 535px;
+}
+
+#dpir1{
+    bottom: 165px;
+    left: 535px;
+}
+
+#dus1{
+    bottom: 190px;
+    left: 535px;
+}
+
+#ds1{
+    bottom: 212px;
+    left: 540px;
+}
+
+#db{
+    bottom: 255px;
+    left: 590px;
+}
+
+#dms{
+    bottom: 325px;
+    left: 535px;
+}
+
+#rpir1{
+    bottom: 255px;
+    left: 490px;
+}
+
+#rpir2{
+    top: 285px;
+    left: 450px;
+}
+
+#rdht1{
+    bottom: 165px;
+    left: 450px;
+}
+
+#rdht2{
+    bottom: 280px;
+    left: 455px;
+}
+
+
+#ds2{
+    bottom: 335px;
+    left: 675px;
+}
+
+#dus2{
+    bottom: 325px;
+    left: 697px;
+}
+
+#glcd{
+    bottom: 305px;
+    left: 675px;
+}
+
+#gdht{
+    bottom: 305px;
+    left: 697px;
+}
+
+#gsg{
+    bottom: 395px;
+    right: 735px;
+}
+
+#dpir2{
+    bottom: 370px;
+    left: 725px;
+}
+
+#rpir3{
+    top: 285px;
+    left: 605px;
+}
+
+#rdht3{
+    top: 285px;
+    left: 635px;
+}
+
+
+#rpir4{
+    top: 50px;
+    left: 700px;
+}
+
+#rdht4{
+    top: 45px;
+    right: 700px;
+}
+
+#bb{
+    top: 45px;
+    right: 610px;
+}
+
+#b4sd{
+    top: 45px;
+    right: 575px;
+}
+
+#bir{
+    right: 735px;
+    top: 135px;
+}
+
+#brgb{
+    right: 650px;
+    top: 135px;
+}
