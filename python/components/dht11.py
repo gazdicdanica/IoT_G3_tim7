@@ -21,7 +21,7 @@ def publisher_task(event, _batch):
             publish_data_counter = 0
             _batch.clear()
             publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
-        # print(local_batch)
+            # print(local_batch)
             print(f'published dht values')
         event.clear()
 
@@ -63,7 +63,7 @@ def run_dht(settings, threads, stop_event):
     PORT = settings['port']
     if settings['simulated']:
         print("Starting dht1 sumulator")
-        dht1_thread = threading.Thread(target = run_dht_simulator, args=(4, dht_callback, stop_event, settings['name'], settings['runsOn']))
+        dht1_thread = threading.Thread(target = run_dht_simulator, args=(1, dht_callback, stop_event, settings['name'], settings['runsOn']))
         dht1_thread.start()
         threads.append(dht1_thread)
         print("Dht1 sumulator started")

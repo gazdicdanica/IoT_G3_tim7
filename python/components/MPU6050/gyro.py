@@ -1,8 +1,11 @@
 
-from sim.gyro import run_dht_simulator
+from sim.gyro import run_gyro_simulator
 import threading, time, json
 import paho.mqtt.publish as publish
-from sensors.gyro import MPU6050 
+try:
+    from sensors.gyro import MPU6050 
+except:
+    pass
 
 
 sensor_data_lock = threading.Lock()
@@ -22,7 +25,7 @@ def publisher_task(event, _batch):
             local_batch = _batch.copy()
             publish_data_counter = 0
             _batch.clear()
-            # publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
+            publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
         # print(local_batch)
             print(f'published gyro values')
         event.clear()
@@ -39,7 +42,7 @@ first_callback = True
 
 
 def gyro_callback(accel, gyro, code, name, simulated, runsOn):
-    global sensor_data_lock, publish_data_counter, publish_data_limit
+    global sensor_data_lock, publish_data_counter, publish_data_limit, first_callback, previous_gyro_values, SIGNIFICANT_CHANGE_THRESHOLD
     t = time.strftime('%H:%M:%S', time.localtime()) 
     data = {
         "measurement": name,
@@ -47,8 +50,12 @@ def gyro_callback(accel, gyro, code, name, simulated, runsOn):
         "simulated": simulated,
         "runsOn": runsOn,
         "values": {
-            "acceleration": accel,
-            "gyroscope": gyro,
+            "acceleration_0": accel[0],
+            "acceleration_1": accel[1],
+            "acceleration_2": accel[2],
+            "gyroscope_0": gyro[0],
+            "gyroscope_1": gyro[1],
+            "gyroscope_2": gyro[2],
         },
         "code": code,
         "timestamp": t
@@ -58,7 +65,7 @@ def gyro_callback(accel, gyro, code, name, simulated, runsOn):
         batch.append((name, json.dumps(data), 0, True))
         publish_data_counter += 1
         if not first_callback and any(abs(current - previous) > SIGNIFICANT_CHANGE_THRESHOLD for current, previous in zip(gyro, previous_gyro_values)):
-            notify_significant_change(name, runsOn)
+            notify_significant_change(name, runsOn, simulated)
 
         previous_gyro_values = gyro.copy()
         first_callback = False
@@ -66,12 +73,13 @@ def gyro_callback(accel, gyro, code, name, simulated, runsOn):
         publish_event.set()
 
 
-def notify_significant_change(name, runsOn):
-    publish.single("GYRO_ALERT", json.dumps({
+def notify_significant_change(name, runsOn, simulated):
+    publish.single("ALERT", json.dumps({
         "name": name,
         "runsOn": runsOn,
+        "simulated": simulated,
     }), hostname=HOSTNAME, port=PORT)
-    print("Published Alarm because of significant change in gyro values")
+    # print("Published Alarm because of significant change in gyro values")
 
 
 def run_gyro(settings, threads, stop_event):
@@ -80,13 +88,13 @@ def run_gyro(settings, threads, stop_event):
     PORT = settings['port']
     if settings['simulated']:
         print("Starting simulated gyro")
-        gyro_thread = threading.Thread(target=run_dht_simulator, args=(10, gyro_callback, stop_event, settings['name'], settings['runsOn'],))
+        gyro_thread = threading.Thread(target=run_gyro_simulator, args=(1, gyro_callback, stop_event, settings['name'], settings['runsOn'],))
         gyro_thread.start()
         threads.append(gyro_thread)
         print("Started simulated gyro")
     else:
         from sensors.gyro.gyro import run_gyro_loop
-        print("Starting dht1 loop")
+        print("Starting gyro loop")
         mpu = MPU6050.MPU6050()     #instantiate a MPU6050 class object
         accel = [0]*3               #store accelerometer data
         gyro = [0]*3                #store gyroscope data

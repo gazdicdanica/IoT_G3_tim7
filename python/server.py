@@ -2,7 +2,7 @@ from flask import Flask
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
-import json
+import json, time, threading
 import paho.mqtt.publish as publish
 
 app = Flask(__name__)
@@ -16,11 +16,41 @@ bucket = "iote"
 influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
 mqtt_client = mqtt.Client()
-mqtt_client.connect("localhost", 1883, 60)
+mqtt_client.connect("localhost", 1883)
 mqtt_client.loop_start()
+
+ALARM_TRIGGERED = False
+SYSTEM_ACTIVATED = True
+
+g_temp = []
+g_humidity = []
+dht_treshold = 10
+
+dpir1_motion_data = []
+dpir1_treshold_percentage = 50
+dpir1_motion_data_len_treshold = 10
+
+ds_readings = []
+ds_readings_len_treshold = 10
+ds_threshold_percentage = 50
+
+def send_alarm():
+    global ALARM_TRIGGERED
+    send_message("ALARM", json.dumps({"alarm": 1 if ALARM_TRIGGERED else 0}))
+    time.sleep(10)
+
+
+activation_thread = threading.Thread(target=send_alarm)
+activation_thread.start()
+
+
+def send_message(topic, message):
+    print("Sending message: ", message, topic)
+    publish.single(topic, message, hostname="localhost", port=1883)
 
 
 def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
     client.subscribe("RDHT1")
     client.subscribe("RDHT2")
     client.subscribe("RDHT3")
@@ -43,9 +73,10 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("DB")
     client.subscribe("BB")
     client.subscribe("DMS")
+    send_message("DMS_Data", json.dumps({"triggered": ALARM_TRIGGERED, "activated": SYSTEM_ACTIVATED}))
 
     client.subscribe("GSG")
-    client.subscribe("GYRO_ALERT")
+    client.subscribe("ALERT")
 
 
 def on_message(client, userdata, msg):
@@ -54,35 +85,142 @@ def on_message(client, userdata, msg):
     parse_data(data, topic)
 
 
-def send_message(topic, message):
-    publish.single(topic, message, hostname="localhost", port=1883)
-
-
 def parse_data(data, topic=None):
-    if topic == "GDHT":
-        send_message("GDHT_Data", parse_gdht(data))
-    
-    write_to_db(data)
+    global ALARM_TRIGGERED, SYSTEM_ACTIVATED
 
+
+    if topic == "ALERT":
+        trigger_alarm(data['name'], data["runsOn"], data["simulated"])
+        ALARM_TRIGGERED = True
+
+    elif SYSTEM_ACTIVATED:
+        if topic == "GDHT":
+            msg = parse_gdht(data)
+            if msg:
+                send_message("GDHT_Data", msg)
+            write_to_db(data)
+        elif topic == "DPIR1":
+            if parse_pir(data):
+                send_message("DL_Data", json.dumps({"motion_detected": 1}))
+            write_to_db(data)
+        elif topic == "DS1" or topic == "DS2":
+            if parse_ds(data):
+                if not ALARM_TRIGGERED:
+                    trigger_alarm(topic, data["runsOn"], data["simulated"])
+                    ALARM_TRIGGERED = True
+            else:
+                ALARM_TRIGGERED = False
+        elif topic == "DMS":
+            parse_dms(data)
+        else:
+            write_to_db(data)
+    elif topic == "DMS":
+        parse_dms(data)
+
+
+def parse_dms(data):
+    global ALARM_TRIGGERED, SYSTEM_ACTIVATED
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+        action = values.get('action', 0)
+        print(action, ALARM_TRIGGERED, SYSTEM_ACTIVATED)
+        if action == 1:
+            print(ALARM_TRIGGERED, SYSTEM_ACTIVATED)
+            if SYSTEM_ACTIVATED:
+                SYSTEM_ACTIVATED = False
+            elif ALARM_TRIGGERED:
+                ALARM_TRIGGERED = False
+            elif not SYSTEM_ACTIVATED:
+                SYSTEM_ACTIVATED = True
+        else:
+            print("Wrong pin")
+            trigger_alarm(data['name'], data["runsOn"], data["simulated"])
+            return
+        send_message("DMS_Data", json.dumps({"triggered": ALARM_TRIGGERED, "activated": SYSTEM_ACTIVATED}))
+        write_to_db(data)
+    except:
+        print("Error decoding JSON data")
+
+
+def parse_ds(data):
+    global ds_readings, ds_readings_len_treshold
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+        door_opened = values.get('door_opened', 0)
+        ds_readings.append(door_opened)
+    except:
+        print("Error decoding JSON data")
+    # print(ds_readings)
+    if len(ds_readings) >= ds_readings_len_treshold:
+        truthy_count = ds_readings.count(1)
+        total_count = len(ds_readings)
+        percentage_truthy = (truthy_count / total_count) * 100
+        ds_readings = []
+        return percentage_truthy >= ds_threshold_percentage
+
+def parse_pir(data):
+    global dpir1_motion_data, dpir1_treshold_percentage, dpir1_motion_data_len_treshold
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+        motion_detected = values.get('motion_detected', 0)
+        dpir1_motion_data.append(motion_detected)
+    except:
+        print("Error decoding JSON data")
+    # print(dpir1_motion_data)
+    if len(dpir1_motion_data) >= dpir1_motion_data_len_treshold:
+        truthy_count = dpir1_motion_data.count(1)
+        total_count = len(dpir1_motion_data)
+        percentage_truthy = (truthy_count / total_count) * 100
+        dpir1_motion_data = []
+        return percentage_truthy >= dpir1_treshold_percentage
+    
 
 def parse_gdht(data):
-    temp_sum = 0
-    temp_count = 0
-    humidity_sum = 0
-    humd_count = 0
-    for dht in data["values"]:
-        if dht["temperature"] > -40 and dht["temperature"] < 50 and dht["humidity"] > 0 and dht["humidity"] < 100:
-            temp_sum += dht["temperature"]
-            humidity_sum += dht["humidity"]
-            temp_count += 1
-            humd_count += 1
-    if humd_count == 0:
-        humd_count = 1
-        temp_count = 1
-    return json.dumps({
-        "temperature": round(temp_sum/temp_count, 1),
-        "humidity": round(humidity_sum/humd_count, 1),
-    })
+    global g_temp, g_humidity, dht_treshold
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+
+        temperature = values.get('temperature', 0)
+        humidity = values.get('humidity', 0)
+        if -20 < temperature < 50 and 0 < humidity < 100:
+            g_temp.append(temperature)
+            g_humidity.append(humidity)
+    except:
+        print("Error decoding JSON data")
+        return json.dumps({"temperature": 0, "humidity": 0})
+    if len(g_temp) >= dht_treshold:
+        average_temperature = round(sum(g_temp) / len(g_temp),1)
+        average_humidity = round(sum(g_humidity) / len(g_humidity),1)
+        g_temp = []
+        g_humidity = []
+        return json.dumps({"temperature": average_temperature, "humidity": average_humidity})
+
+
+def trigger_alarm(trigger, pi, simulated):
+    send_message("ALARM", json.dumps({"alarm": 1}))
+    
+    t = time.strftime('%H:%M:%S', time.localtime())
+    data = {
+        "measurement": "ALARM",
+        "name": "ALARM",
+        "trigger": trigger,
+        "simulated": simulated,
+        "runsOn": pi,
+        "values": {
+            "alarm": 1
+        },
+        "code": 200,
+        "timestamp": t
+    }
+    write_to_db(data)
 
 
 def write_to_db(data):

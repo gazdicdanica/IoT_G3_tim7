@@ -21,6 +21,7 @@ export class WakeUpComponent {
   }
 
   close(){
+    // TODO: stop the alarm
     this.dialogRef.close();
     this.audio.pause();
   }

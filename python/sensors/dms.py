@@ -2,9 +2,10 @@ import RPi.GPIO as GPIO
 import time
 
 class DMS:
-    def __init__(self, name, pins):
+    def __init__(self, name, pins, pincode):
         self.name = name
         self.pins = pins
+        self.pincode = pincode
 
         GPIO.setup(pins[0], GPIO.OUT)
         GPIO.setup(pins[1], GPIO.OUT)
@@ -19,24 +20,40 @@ class DMS:
     def readLine(self, line, characters):
         GPIO.output(line, GPIO.HIGH)
         if(GPIO.input(self.pins[4]) == 1):
-            print(characters[0])
+            return characters[0]
         if(GPIO.input(self.pins[5]) == 1):
-            print(characters[1])
+            return characters[1]
         if(GPIO.input(self.pins[6]) == 1):
-            print(characters[2])
+            return characters[2]
         if(GPIO.input(self.pins[7]) == 1):
-            print(characters[3])
+            return characters[3]
         GPIO.output(line, GPIO.LOW)
 
 
 # TODO: implement this
 def run_dms_loop(self, delay, callback, stop_event, name, runsOn):
+    a = None
+    b = None
+    c = None 
+    d = None
     while True:
-        self.readLine(self.pins[0], ["1","2","3","A"])
-        self.readLine(self.pins[1], ["4","5","6","B"])
-        self.readLine(self.pins[2], ["7","8","9","C"])
-        self.readLine(self.pins[3], ["*","0","#","D"])
+        a = self.readLine(self.pins[0], ["1","2","3","A"])
+        b = self.readLine(self.pins[1], ["4","5","6","B"])
+        c = self.readLine(self.pins[2], ["7","8","9","C"])
+        d = self.readLine(self.pins[3], ["*","0","#","D"])
+        if a and b and c and d:
+            code = a + b + c + d
+            if code == self.pincode:
+                callback(False, name, False, runsOn)
+            else:
+                callback(True, name, False, runsOn)
+                a = None
+                b = None
+                c = None
+                d = None
+        
         time.sleep(0.2)
-
+        if stop_event.is_set():
+            break
 
     

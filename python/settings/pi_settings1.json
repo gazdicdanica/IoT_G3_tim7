@@ -75,6 +75,7 @@
     "DMS": {
       "name": "DMS",
       "simulated": true,
+      "pincode": "1234",
       "pins":[20, 21, 8, 7, 1, 12, 13, 19],
       "runsOn": "Pi1",
       "hostname": "localhost",
