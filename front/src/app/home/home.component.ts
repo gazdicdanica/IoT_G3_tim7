@@ -13,7 +13,6 @@ export class HomeComponent {
   constructor(private dialog: MatDialog){}
 
   ngOnInit(): void {
-    this.openClockDialog();
   }
 
   openClockDialog(){
