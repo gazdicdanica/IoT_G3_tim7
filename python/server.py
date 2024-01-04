@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 # InfluxDB Configuration
-token = "cE7Ju58CY7uIwggkfIfQUp2-sc5W_4OmyVdpbR4EMAqWmo0MlxnPCL9ucxUjieP3074fNm6N3vtRSipaefWm4Q=="
+token = "MSTpt-PbZm1adkn5F6EvIcGiuksMFZRNLPiUsJUVaYLULa04S54S5-3mDIFwlCB8NybfrekC7vqv-a7V_xHdgg=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"
@@ -19,6 +19,7 @@ mqtt_client = mqtt.Client()
 mqtt_client.connect("localhost", 1883)
 mqtt_client.loop_start()
 
+ALARM_TRIGGERED = False
 
 g_temp = []
 g_humidity = []
@@ -73,18 +74,29 @@ def send_message(topic, message):
 
 
 def parse_data(data, topic=None):
+    global ALARM_TRIGGERED
     if topic == "GDHT":
         msg = parse_gdht(data)
         if msg:
             send_message("GDHT_Data", msg)
+        write_to_db(data)
     elif topic == "DPIR1":
         if parse_pir(data):
             send_message("DL_Data", json.dumps({"motion_detected": 1}))
+        write_to_db(data)
     elif topic == "DS1" or topic == "DS2":
         if parse_ds(data):
+            if not ALARM_TRIGGERED:
+                trigger_alarm(topic, data["runsOn"], data["simulated"])
+                ALARM_TRIGGERED = True
+        else:
+            ALARM_TRIGGERED = False
+    elif topic == "GYRO_ALERT":
+        if not ALARM_TRIGGERED:
             trigger_alarm(topic, data["runsOn"], data["simulated"])
-
-    write_to_db(data)
+            ALARM_TRIGGERED = True
+    else:
+        write_to_db(data)
 
 
 def parse_ds(data):
