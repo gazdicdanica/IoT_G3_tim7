@@ -2,7 +2,7 @@ from flask import Flask
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
-import json
+import json, time
 import paho.mqtt.publish as publish
 
 app = Flask(__name__)
@@ -22,8 +22,15 @@ mqtt_client.loop_start()
 
 g_temp = []
 g_humidity = []
+dht_treshold = 10
+
 dpir1_motion_data = []
 dpir1_treshold_percentage = 50
+dpir1_motion_data_len_treshold = 10
+
+ds_readings = []
+ds_readings_len_treshold = 10
+ds_threshold_percentage = 50
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -73,12 +80,33 @@ def parse_data(data, topic=None):
     elif topic == "DPIR1":
         if parse_pir(data):
             send_message("DL_Data", json.dumps({"motion_detected": 1}))
+    elif topic == "DS1" or topic == "DS2":
+        if parse_ds(data):
+            trigger_alarm(topic, data["runsOn"], data["simulated"])
 
     write_to_db(data)
 
 
+def parse_ds(data):
+    global ds_readings, ds_readings_len_treshold
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+        door_opened = values.get('door_opened', 0)
+        ds_readings.append(door_opened)
+    except:
+        print("Error decoding JSON data")
+    print(ds_readings)
+    if len(ds_readings) >= ds_readings_len_treshold:
+        truthy_count = ds_readings.count(1)
+        total_count = len(ds_readings)
+        percentage_truthy = (truthy_count / total_count) * 100
+        ds_readings = []
+        return percentage_truthy >= ds_threshold_percentage
+
 def parse_pir(data):
-    global dpir1_motion_data, dpir1_treshold_percentage
+    global dpir1_motion_data, dpir1_treshold_percentage, dpir1_motion_data_len_treshold
     try:
         if isinstance(data, str):
             data = json.loads(data)
@@ -88,7 +116,7 @@ def parse_pir(data):
     except:
         print("Error decoding JSON data")
     print(dpir1_motion_data)
-    if len(dpir1_motion_data) >= 10:
+    if len(dpir1_motion_data) >= dpir1_motion_data_len_treshold:
         truthy_count = dpir1_motion_data.count(1)
         total_count = len(dpir1_motion_data)
         percentage_truthy = (truthy_count / total_count) * 100
@@ -97,7 +125,7 @@ def parse_pir(data):
     
 
 def parse_gdht(data):
-    global g_temp, g_humidity
+    global g_temp, g_humidity, dht_treshold
     try:
         if isinstance(data, str):
             data = json.loads(data)
@@ -111,13 +139,31 @@ def parse_gdht(data):
     except:
         print("Error decoding JSON data")
         return json.dumps({"temperature": 0, "humidity": 0})
-    if len(g_temp) >= 10:
+    if len(g_temp) >= dht_treshold:
         average_temperature = round(sum(g_temp) / len(g_temp),1)
         average_humidity = round(sum(g_humidity) / len(g_humidity),1)
         g_temp = []
         g_humidity = []
         return json.dumps({"temperature": average_temperature, "humidity": average_humidity})
 
+
+def trigger_alarm(trigger, pi, simulated):
+    send_message("ALARM", json.dumps({"alarm": 1}))
+    
+    t = time.strftime('%H:%M:%S', time.localtime())
+    data = {
+        "measurement": "ALARM",
+        "name": "ALARM",
+        "trigger": trigger,
+        "simulated": simulated,
+        "runsOn": pi,
+        "values": {
+            "alarm": 1
+        },
+        "code": 200,
+        "timestamp": t
+    }
+    write_to_db(data)
 
 
 def write_to_db(data):
