@@ -8,19 +8,24 @@ import { DhtComponent } from './dht/dht.component';
 import { HomeComponent } from './home/home.component';
 import { MaterialModule } from 'src/infrastructure/material/material.module';
 import { RgbComponent } from './rgb/rgb.component';
+import { ClockComponent } from './clock/clock.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     DhtComponent,
     HomeComponent,
-    RgbComponent
+    RgbComponent,
+    ClockComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    MaterialModule
+    MaterialModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
