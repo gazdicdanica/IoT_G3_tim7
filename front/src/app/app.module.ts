@@ -11,6 +11,7 @@ import { RgbComponent } from './rgb/rgb.component';
 import { ClockComponent } from './clock/clock.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WakeUpComponent } from './wake-up/wake-up.component';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { WakeUpComponent } from './wake-up/wake-up.component';
     BrowserAnimationsModule,
     MaterialModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

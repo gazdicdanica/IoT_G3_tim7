@@ -10,20 +10,13 @@ import { Howl } from 'howler';
 export class WakeUpComponent {
 
   constructor(private dialogRef: MatDialogRef<WakeUpComponent>) { }
-
-  audio: any;
-
+  
   ngOnInit(){
-    this.audio = new Audio();
-    this.audio.src = "../../assets/dire_straits.mp3";
-    this.audio.load();
-    this.audio.play();
   }
 
   close(){
     // TODO: stop the alarm
     this.dialogRef.close();
-    this.audio.pause();
   }
 
 }
