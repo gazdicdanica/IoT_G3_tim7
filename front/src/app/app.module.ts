@@ -7,12 +7,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DhtComponent } from './dht/dht.component';
 import { HomeComponent } from './home/home.component';
 import { MaterialModule } from 'src/infrastructure/material/material.module';
+import { RgbComponent } from './rgb/rgb.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DhtComponent,
-    HomeComponent
+    HomeComponent,
+    RgbComponent
   ],
   imports: [
     BrowserModule,
