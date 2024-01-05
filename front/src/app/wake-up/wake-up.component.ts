@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Howl } from 'howler';
+import { ServiceService } from '../service/service.service';
 
 @Component({
   selector: 'app-wake-up',
@@ -9,14 +10,16 @@ import { Howl } from 'howler';
 })
 export class WakeUpComponent {
 
-  constructor(private dialogRef: MatDialogRef<WakeUpComponent>) { }
+  constructor(private dialogRef: MatDialogRef<WakeUpComponent>, private service: ServiceService) { }
   
   ngOnInit(){
   }
 
   close(){
-    // TODO: stop the alarm
-    this.dialogRef.close();
+    this.service.turnOffWakeUp().subscribe({
+      next: data => this.dialogRef.close(),
+      error: error => console.error('There was an error!', error)
+    });
   }
 
 }
