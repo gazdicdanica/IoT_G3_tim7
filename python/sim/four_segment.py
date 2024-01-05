@@ -9,7 +9,7 @@ def get_time():
         yield current.strftime("%H:%M:%S")
 
 
-def run_4_segment_simulator(alarm_queue, turn_off_queue, delay, stop_event, name, runsOn):
+def run_4_segment_simulator(alarm_queue, turn_off_queue, callback, delay, stop_event, name, runsOn):
     global alarm, alarm_on 
     time_generator = get_time()
     for t in time_generator:
@@ -23,6 +23,7 @@ def run_4_segment_simulator(alarm_queue, turn_off_queue, delay, stop_event, name
         if alarm is not None and alarm == t:
             # TODO: buzzer
             alarm_on = True
+            callback()
             print("WAKE UP!!")
         
         time.sleep(delay)

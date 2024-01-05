@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_socketio import SocketIO, join_room
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
@@ -9,6 +10,14 @@ import datetime
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="*")
+
+@socketio.on('subscribe')
+def handle_subscribe(topic):
+    join_room(topic)
+    print(f"Subscribed to {topic}")
+
 
 # InfluxDB Configuration
 token = "SvsngmuRMMNRO0MCUg6Vd47SFz7sLQ6WLlj5GAFFumVke0KnFOo5FFxYfM1n_IMiDY9DdIpH8Nz0GZ3Xr3qHRg=="
@@ -36,6 +45,15 @@ ds_readings = []
 ds_readings_len_treshold = 10
 ds_threshold_percentage = 50
 
+
+def send_message_to_topic(topic, message):
+    socketio.emit('message', message, room=topic)
+
+
+def send_message(topic, message):
+    print("Sending message: ", message, topic)
+    publish.single(topic, message, hostname="localhost", port=1883)
+
 def send_alarm():
     global ALARM_TRIGGERED
     send_message("ALARM", json.dumps({"alarm": 1 if ALARM_TRIGGERED else 0}))
@@ -44,11 +62,6 @@ def send_alarm():
 
 activation_thread = threading.Thread(target=send_alarm)
 activation_thread.start()
-
-
-def send_message(topic, message):
-    print("Sending message: ", message, topic)
-    publish.single(topic, message, hostname="localhost", port=1883)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -84,6 +97,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     data = json.loads(msg.payload.decode('utf-8'))
     topic = msg.topic
+    print("TOPIC")
+    print(topic)
     parse_data(data, topic)
 
 
@@ -114,6 +129,9 @@ def parse_data(data, topic=None):
                 ALARM_TRIGGERED = False
         elif topic == "DMS":
             parse_dms(data)
+        elif topic == "B4SD":
+            print("B4SD")
+            send_message_to_topic("wake_up", json.dumps(data))
         else:
             write_to_db(data)
     elif topic == "DMS":

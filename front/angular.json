@@ -91,7 +91,9 @@
               "@angular/material/prebuilt-themes/deeppurple-amber.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/polyfills.js"
+            ]
           }
         }
       }
