@@ -28,6 +28,11 @@ export class HomeComponent {
       this.wsService.subscribeWakeUpTopic((message: any) => {
         this.wakeUp();
       });
+
+      this.wsService.subscribeClockTopic((message: any) => {
+        // TODO : send data to clock component
+        console.log(message);
+      });
     }).catch((error: any) => {
       console.error('Error connecting to WebSocket:', error);
     });

@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { Howl } from 'howler';
 import { ServiceService } from '../service/service.service';
+import { WebsocketService } from '../service/websocket.service';
 
 @Component({
   selector: 'app-wake-up',

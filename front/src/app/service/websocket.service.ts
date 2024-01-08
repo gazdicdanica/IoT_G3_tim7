@@ -38,6 +38,18 @@ export class WebsocketService {
     });
   }
 
+
+  subscribeClockTopic(callback: (message: any) => void) {
+    return this.socket.on('clock', (message: any) => {
+      callback(JSON.parse(message.body));
+    });
+  }
+
+  disconnect(): void {
+    if (this.socket && this.socket.connected) {
+      this.socket.disconnect();
+    }
+  }
   // disconnect() {
   //   if (this.stompClient !== null) {
   //     this.stompClient.disconnect();

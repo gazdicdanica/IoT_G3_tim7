@@ -20,7 +20,7 @@ def handle_subscribe(topic):
 
 
 # InfluxDB Configuration
-token = "SvsngmuRMMNRO0MCUg6Vd47SFz7sLQ6WLlj5GAFFumVke0KnFOo5FFxYfM1n_IMiDY9DdIpH8Nz0GZ3Xr3qHRg=="
+token = "b2Rw7AZug6z8VHqJX2wH1A19oxM1eyvnxzly0rwabSAlJ6TkHDRIjNVZyXZr902RnQog9Ed3hphzXAaXZjNltw=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"
@@ -46,7 +46,7 @@ ds_readings_len_treshold = 10
 ds_threshold_percentage = 50
 
 
-def send_message_to_topic(topic, message):
+def send_ws_message(topic, message):
     socketio.emit('message', message, room=topic)
 
 
@@ -130,13 +130,23 @@ def parse_data(data, topic=None):
         elif topic == "DMS":
             parse_dms(data)
         elif topic == "B4SD":
-            print("B4SD")
-            send_message_to_topic("wake_up", json.dumps(data))
+            parse_b4sd(data)
         else:
             write_to_db(data)
     elif topic == "DMS":
         parse_dms(data)
 
+
+def parse_b4sd(data):
+    print(data)
+    if isinstance(data, str):
+        data = json.loads(data)
+    values = data.get('values', {})
+    alarm = values.get('alarm', 0)
+    if alarm is True:
+        send_ws_message("wake_up", json.dumps(data))
+    else:
+        send_ws_message("time", values.get('time', 0))
 
 def parse_dms(data):
     global ALARM_TRIGGERED, SYSTEM_ACTIVATED

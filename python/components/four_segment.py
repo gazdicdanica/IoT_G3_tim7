@@ -51,11 +51,17 @@ def on_message(client, userdata, msg):
     else:
         turn_off.put(True)
 
-def callback():
+def callback(alarm, time):
     global sensor_data_lock, publish_data_counter, publish_data_limit
-    data = {
-        "alarm": True
-    }
+    data = None
+    if(alarm):
+        data = {
+            "alarm": True
+        }
+    else:
+        data = {
+            "time": time
+        }
     with counter_lock:
         batch.append(("B4SD", json.dumps(data), 0, True))
         publish_data_counter += 1

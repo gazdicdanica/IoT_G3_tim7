@@ -40,9 +40,10 @@ def run_display_loop(alarm_queue, turn_off_queue, callback, delay, four_segment,
                 four_segment.alarm_on = False
             current = datetime.datetime.now().replace(second=0)
             display_time = current.strftime("%H:%M:%S")
+            callback(False, display_time)
             if display_time == four_segment.alarm:
                 four_segment.alarm_on = True
-                callback()
+                callback(True, None)
             for digit in range(4):
                 for loop in range(0, 7):
                     GPIO.output(four_segment.segments[loop], four_segment.num[display_time[digit]][loop])
