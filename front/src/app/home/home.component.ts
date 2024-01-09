@@ -3,6 +3,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { RgbComponent } from '../rgb/rgb.component';
 import { ClockComponent } from '../clock/clock.component';
 import { WakeUpComponent } from '../wake-up/wake-up.component';
+import { WebsocketService } from '../service/websocket.service';
 
 @Component({
   selector: 'app-home',
@@ -11,7 +12,7 @@ import { WakeUpComponent } from '../wake-up/wake-up.component';
 })
 export class HomeComponent {
 
-  constructor(private dialog: MatDialog){}
+  constructor(private wsService: WebsocketService, private dialog: MatDialog){}
 
   dialogConfig = new MatDialogConfig();
   
@@ -21,6 +22,21 @@ export class HomeComponent {
     this.dialogConfig.closeOnNavigation = true;
     this.dialogConfig.width = '30%';
     this.dialogConfig.height = 'auto';
+
+
+    this.wsService.connect().then(() => {
+      this.wsService.subscribeWakeUpTopic((message: any) => {
+        this.wakeUp();
+      });
+
+      this.wsService.subscribeClockTopic((message: any) => {
+        // TODO : send data to clock component
+        console.log(message);
+      });
+    }).catch((error: any) => {
+      console.error('Error connecting to WebSocket:', error);
+    });
+  
   }
 
   openClockDialog(){

@@ -12,4 +12,8 @@ export class ServiceService {
   setWakeUpTime(time: any){
     return this.http.get(environment.apiHost + '/api/set_wakeup_time?time='+time);
   }
+
+  turnOffWakeUp(){
+    return this.http.get(environment.apiHost + '/api/turn_off_alarm');
+  }
 }
