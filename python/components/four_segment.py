@@ -56,7 +56,7 @@ def callback(alarm, time):
     data = None
     if(alarm):
         data = {
-            "alarm": True
+            "alarm": 1
         }
     else:
         data = {

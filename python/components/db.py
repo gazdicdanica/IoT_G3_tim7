@@ -14,6 +14,7 @@ HOSTNAME = ""
 PORT = 0
 should_turn_on_bb = Queue()
 should_turn_on_db = Queue()
+wake_up_bb = Queue()
 mqtt_client = mqtt.Client()
 
 
@@ -26,8 +27,9 @@ def on_message(client, userdata, msg):
     global should_turn_on
     data = json.loads(msg.payload.decode('utf-8'))
     print(data)
+    if not data["wake_up"]:
+        should_turn_on_db.put(data["alarm"] == 1)    
     should_turn_on_bb.put(data["alarm"] == 1)
-    should_turn_on_db.put(data["alarm"] == 1)
 
 
 def publisher_task(event, _batch):
