@@ -7,13 +7,14 @@ class IR:
     ButtonsNames = ["LEFT",   "RIGHT",      "UP",       "DOWN",       "2",          "3",          "1",        "OK",        "4",         "5",         "6",         "7",         "8",          "9",        "*",         "0",        "#"]  # String list in same order as HEX list
 
     # OK - off
-    # 1 - white
-    # 2 - red
-    # 3 - green
-    # 4 - blue
-    # 5 - yellow
-    # 6 - purple
-    # 7 - light blue
+    # 1 - red
+    # 2 - green
+    # 3 - blue
+    # 4 - yellow
+    # 5 - purple
+    # 6 - light blue
+    # 7 - white
+
 
     def __init__(self, name, pin):
         self.name = name
@@ -76,7 +77,7 @@ class IR:
         return hex(tmpB2)
     
 
-def run_ir_loop(ir, delay, stop_event, name, runsOn):
+def run_ir_loop(callback, ir, delay, stop_event, name, runsOn):
 
     # IR is used to change RGB 
 
@@ -85,7 +86,7 @@ def run_ir_loop(ir, delay, stop_event, name, runsOn):
         for button in range(len(ir.Buttons)):
             if hex(ir.Buttons[button]) == inData:
                 print(ir.ButtonsNames[button])
-                # TODO: propagate the button event to server
+                callback(ir.ButtonsNames[button])
         if stop_event.is_set():
             break
         time.sleep(delay)

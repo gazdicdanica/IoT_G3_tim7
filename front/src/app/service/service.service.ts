@@ -16,4 +16,8 @@ export class ServiceService {
   turnOffWakeUp(){
     return this.http.get(environment.apiHost + '/api/turn_off_alarm');
   }
+
+  change_rgb_color(color: any){
+    return this.http.put(environment.apiHost + '/api/change_rgb', {"color": color});
+  }
 }

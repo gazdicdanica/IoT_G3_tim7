@@ -64,22 +64,22 @@ def run_rgb_loop(input_queue, rgb, delay, stop_event, name, runsOn):
     while True:
         if input_queue.qsize() > 0:
             user_input = input_queue.get()
-            if user_input == "x":
+            if user_input == "OK":
                 rgb.turn_off()
                 #TODO: da li treba callback?
-            elif user_input == "w":
+            elif user_input == "7":
                 rgb.white()
-            elif user_input == "r":
+            elif user_input == "1":
                 rgb.red()
-            elif user_input == "g":
+            elif user_input == "2":
                 rgb.green()
-            elif user_input == "b":
+            elif user_input == "3":
                 rgb.blue()
-            elif user_input == "y":
+            elif user_input == "4":
                 rgb.yellow()
-            elif user_input == "p":
+            elif user_input == "5":
                 rgb.purple()
-            elif user_input == "lb":
+            elif user_input == "6":
                 rgb.light_blue()
         if stop_event.is_set():
             break

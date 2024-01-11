@@ -131,10 +131,22 @@ def parse_data(data, topic=None):
             parse_dms(data)
         elif topic == "B4SD":
             parse_b4sd(data)
+        elif topic == "IR":
+            parse_ir(data)
         else:
             write_to_db(data)
     elif topic == "DMS":
         parse_dms(data)
+
+
+def parse_ir(data):
+    print(data)
+    if isinstance(data, str):
+        data = json.loads(data)
+    values = data.get('values', {})
+    button_pressed = values.get('button_pressed', "")
+    send_message("rgb_value", json.dumps({"button_pressed": button_pressed}))
+    send_ws_message("rgb_value", json.dumps({"button_pressed": button_pressed}))
 
 
 def parse_b4sd(data):
@@ -304,6 +316,22 @@ def turn_off_alarm():
     try:
         send_message("ALARM", json.dumps({"alarm": 0, "wake_up": True}))
         send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
+        return jsonify({}), 200
+    except ValueError as ex:
+        return jsonify({'error': str(ex)}), 400
+    
+
+@app.route("/api/change_rgb", methods=["PUT"])
+def change_rgb():
+    try:
+        data = request.get_json()
+        color = data.get('color')
+        
+        if color is None:
+            raise ValueError("Color parameter is missing in the request body")
+
+        print(f"Changing rgb to {color}")
+        send_message("rgb_data", color)
         return jsonify({}), 200
     except ValueError as ex:
         return jsonify({'error': str(ex)}), 400
