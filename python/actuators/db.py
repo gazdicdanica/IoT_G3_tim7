@@ -22,10 +22,10 @@ def run_db_loop(should_turn_on_db, should_turn_on_bb, input_queue, db, delay, ca
     alarm_on = False
     should_turn_on = Queue()
     if name == "DB":
-        print("Starting DB simulator")
+        print("Starting DB loop")
         should_turn_on = should_turn_on_db
     elif name == "BB":
-        print("Starting BB simulator")
+        print("Starting BB loop")
         should_turn_on = should_turn_on_bb
     while True:
         if should_turn_on.qsize() > 0:

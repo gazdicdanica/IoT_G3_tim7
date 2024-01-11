@@ -144,6 +144,8 @@ def parse_b4sd(data):
     values = data.get('values', {})
     alarm = values.get('alarm', 0)
     if alarm is True:
+        # TODO: send message to BB
+        send_message("ALARM", json.dumps({"alarm": 1, "wake_up": True}))
         send_ws_message("wake_up", json.dumps(data))
     else:
         send_ws_message("time", values.get('time', 0))
@@ -300,6 +302,7 @@ def set_wakeup_time():
 @app.route('/api/turn_off_alarm', methods=['GET'])
 def turn_off_alarm():
     try:
+        send_message("ALARM", json.dumps({"alarm": 0, "wake_up": True}))
         send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
         return jsonify({}), 200
     except ValueError as ex:
