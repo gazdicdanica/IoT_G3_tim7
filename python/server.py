@@ -20,7 +20,7 @@ def handle_subscribe(topic):
 
 
 # InfluxDB Configuration
-token = "b2Rw7AZug6z8VHqJX2wH1A19oxM1eyvnxzly0rwabSAlJ6TkHDRIjNVZyXZr902RnQog9Ed3hphzXAaXZjNltw=="
+token = "0b2rnAQWMcBP8u6_S5iO2Gc3MxoJj0offA9lwK0X_nFWlyQduR2tBlmBeIJDUb-b_OfXXj4T0JOfa-WctndbaA=="
 org = "iot"
 url = "http://localhost:8086"
 bucket = "iote"

@@ -18,12 +18,13 @@ def run_4_segment_simulator(alarm_queue, turn_off_queue, callback, delay, stop_e
             alarm = a
         if turn_off_queue.qsize() > 0:
             alarm_on = False   
+        callback(False, t)
         print(f"Current time - {t}")
         print(f"Alarm - {alarm}")
         if alarm is not None and alarm == t:
             # TODO: buzzer
             alarm_on = True
-            callback()
+            callback(True, None)
             print("WAKE UP!!")
         
         time.sleep(delay)
