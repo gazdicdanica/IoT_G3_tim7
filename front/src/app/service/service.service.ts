@@ -10,10 +10,10 @@ export class ServiceService {
   constructor(private http: HttpClient) { }
 
   setWakeUpTime(time: any){
-    return this.http.get(environment.apiHost + '/api/set_wakeup_time?time='+time);
+    return this.http.get(environment.apiHost + 'api/set_wakeup_time?time='+time);
   }
 
   turnOffWakeUp(){
-    return this.http.get(environment.apiHost + '/api/turn_off_alarm');
+    return this.http.get(environment.apiHost + 'api/turn_off_alarm');
   }
 }

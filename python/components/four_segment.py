@@ -12,7 +12,10 @@ publish_data_limit = 1
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+username = "admin"
+password = "admin"
 mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
 
 alarm_time = Queue()
 turn_off = Queue()

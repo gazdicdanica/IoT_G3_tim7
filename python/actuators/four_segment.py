@@ -41,13 +41,16 @@ def run_display_loop(alarm_queue, turn_off_queue, callback, delay, four_segment,
             current = datetime.datetime.now().replace(second=0)
             display_time = current.strftime("%H:%M:%S")
             callback(False, display_time)
+            print(display_time, four_segment.alarm)
             if display_time == four_segment.alarm:
                 four_segment.alarm_on = True
                 callback(True, None)
+            n = time.ctime()[11:13]+time.ctime()[14:16]
+            s = str(n).rjust(4)
             for digit in range(4):
                 for loop in range(0, 7):
-                    GPIO.output(four_segment.segments[loop], four_segment.num[display_time[digit]][loop])
-                    if (datetime.datetime.now().second % 2 == 0) and (digit == 1):
+                    GPIO.output(four_segment.segments[loop], four_segment.num[s[digit]][loop])
+                    if (int(time.ctime()[18:19]) % 2 == 0) and (digit == 1):
                         GPIO.output(25, 1)
                     else:
                         GPIO.output(25, 0)
@@ -61,7 +64,6 @@ def run_display_loop(alarm_queue, turn_off_queue, callback, delay, four_segment,
                 GPIO.output(four_segment.digits[digit], 1)
             if stop_event.is_set():
                 break
-            time.sleep(delay)
                 
     finally:
         GPIO.cleanup()
