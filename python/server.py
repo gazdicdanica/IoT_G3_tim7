@@ -32,12 +32,13 @@ ds_readings_len_treshold = 10
 ds_threshold_percentage = 50
 
 def send_ws_message(topic, message):
-    socketio.emit('message', message, room=topic)
+    print("Sending web socket message: ", message, topic)
+    socketio.emit(topic, message)
 
 
 def send_message(topic, message):
     print("Sending message: ", message, topic)
-    publish.single(topic, message, hostname="localhost", port=1883)
+    publish.single(topic, message, hostname="192.168.1.103", port=1883)
 
 def send_alarm():
     global ALARM_TRIGGERED
@@ -83,8 +84,6 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     data = json.loads(msg.payload.decode('utf-8'))
     topic = msg.topic
-    # print("TOPIC")
-    # print(topic)
     parse_data(data, topic)
 
 
@@ -136,16 +135,13 @@ def parse_ir(data):
 
 
 def parse_b4sd(data):
-    # print(data)
     if isinstance(data, str):
         data = json.loads(data)
-    values = data.get('values', {})
-    alarm = values.get('alarm', 0)
-    if alarm is True:
-        print(data)
+    alarm = data.get('alarm', 0)
+    if alarm == 1:
         send_ws_message("wake_up", json.dumps(data))
     else:
-        send_ws_message("time", values.get('time', 0))
+        send_ws_message("time", json.dumps(data))
 
 def parse_dms(data):
     global ALARM_TRIGGERED, SYSTEM_ACTIVATED
@@ -296,12 +292,13 @@ def create_app():
     influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
     mqtt_client = mqtt.Client()
-    mqtt_client.connect("10.1.121.94", 1883)
+    mqtt_client.connect("192.168.1.103", 1883)
+    mqtt_client.enable_logger()
     mqtt_client.loop_start()
     username = "admin"
     password = "admin"
 
-    # mqtt_client.username_pw_set(username, password)
+    mqtt_client.username_pw_set(username, password)
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
 
@@ -320,7 +317,6 @@ def create_app():
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400 
         
-
     @app.route('/api/turn_off_alarm', methods=['GET'])
     def turn_off_alarm():
         try:
