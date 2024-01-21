@@ -91,7 +91,7 @@ def run_all_ultrasonic(threads, stop_event):
 def run_display(threads, stop_event):
     # run_4_segment(settings["B4SD"], threads, stop_event)
     run_rgb(settings["BRGB"], threads, stop_event)
-    run_ir(settings["BIR"], threads, stop_event)
+    run_ir(settings["BIR"], threads, stop_event, rgb_queue)
     # run_lcd_loop(settings['GLCD'], threads, stop_event)
 
 

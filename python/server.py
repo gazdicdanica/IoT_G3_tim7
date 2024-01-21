@@ -79,6 +79,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("GSG")
     client.subscribe("ALERT")
     client.subscribe("B4SD")
+    client.subscribe("IR")
 
 
 def on_message(client, userdata, msg):
@@ -128,9 +129,8 @@ def parse_ir(data):
     print(data)
     if isinstance(data, str):
         data = json.loads(data)
-    values = data.get('values', {})
-    button_pressed = values.get('button_pressed', "")
-    send_message("rgb_value", json.dumps({"button_pressed": button_pressed}))
+    button_pressed = data.get('button_pressed', "")
+    send_message("rgb_data", json.dumps({"button_pressed": button_pressed}))
     send_ws_message("rgb_value", json.dumps({"button_pressed": button_pressed}))
 
 
