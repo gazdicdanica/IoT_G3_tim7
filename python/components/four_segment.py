@@ -57,7 +57,6 @@ def callback(alarm, time):
     global sensor_data_lock, publish_data_counter, publish_data_limit
     data = None
     if(alarm):
-        print("ALARM ACTIVATED")
         data = {
             "alarm": 1
         }

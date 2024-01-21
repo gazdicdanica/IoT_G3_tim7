@@ -178,7 +178,7 @@
       "simulated": true,
       "pin":16,
       "runsOn": "Pi3",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "B4SD": {

@@ -139,9 +139,8 @@ def parse_b4sd(data):
         data = json.loads(data)
     alarm = data.get('alarm', 0)
     if alarm == 1:
+        send_message("wake_up", json.dumps({"alarm": 1}))
         send_ws_message("wake_up", json.dumps(data))
-    else:
-        send_ws_message("time", json.dumps(data))
 
 def parse_dms(data):
     global ALARM_TRIGGERED, SYSTEM_ACTIVATED
@@ -285,7 +284,7 @@ def create_app():
     socketio.init_app(app, cors_allowed_origins="*")
 
     # InfluxDB Configuration
-    token = "lMpTfp0ahA2U-K6pbBtHY5IESIZm1biLGDoSxYFeqX2ZRb1A63cIWUdaD58eRoKbYmRWLE8UOduzgCwmpuJHIQ=="
+    token = "MIrHD7Jt64G1u8BmAC3nmhhYqJ4P12gp953nT6-Khz-DRofp_tz5FNPHXfwUFrIqckQzP1H8vLo7t-cNfvp7hA=="
     org = "iot"
     url = "http://localhost:8086"
     bucket = "iote"
@@ -321,6 +320,7 @@ def create_app():
     def turn_off_alarm():
         try:
             send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
+            send_message("wake_up", json.dumps({"alarm": 0}))
             return jsonify({}), 200
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400
