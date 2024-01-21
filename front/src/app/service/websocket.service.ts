@@ -40,8 +40,9 @@ export class WebsocketService {
 
 
   subscribeClockTopic(callback: (message: any) => void) {
-    return this.socket.on('clock', (message: any) => {
-      callback(JSON.parse(message.body));
+    return this.socket.on('time', (message: any) => {
+      console.log('Received message:', message);
+      callback(JSON.parse(message));
     });
   }
 

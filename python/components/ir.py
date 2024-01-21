@@ -11,12 +11,10 @@ publish_data_limit = 1
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+username = "admin"
+password = "admin"
 mqtt_client = mqtt.Client()
-
-def on_conntect(client, userdata, flags, rc):
-    print("IR connected")
-    client.subscribe("rgb_data")
-
+mqtt_client.username_pw_set(username, password)
 
 def publisher_task(event, _batch):
     global publish_data_counter, publish_data_limit
@@ -50,10 +48,15 @@ def callback(button_pressed):
 
 
 
-def run_ir(settings, threads, stop_event):
+def run_ir(settings, threads, stop_event, input_queue):
+    global HOSTNAME, PORT, mqtt_client
+    HOSTNAME = settings['hostname']
+    PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
     if settings['simulated']:
         print("Starting IR simulator") 
-        ir_thread = threading.Thread(target=run_ir_simulator, args=(callback, 2, stop_event, settings['name'], settings['runsOn']))
+        ir_thread = threading.Thread(target=run_ir_simulator, args=(input_queue, 0.2, callback, stop_event, settings['name'], settings['runsOn']))
         ir_thread.start()
         threads.append(ir_thread)
         print("IR simulator started")
@@ -61,7 +64,7 @@ def run_ir(settings, threads, stop_event):
         from sensors.ir import run_ir_loop, IR
         print("Starting IR loop")
         ir = IR(settings['name'], settings['pin'])
-        ir_thread = threading.Thread(target=run_ir_loop, args=(callback, ir, 2, stop_event, settings['name'], settings['runsOn']))
+        ir_thread = threading.Thread(target=run_ir_loop, args=(callback, ir, 0.2, stop_event, settings['name'], settings['runsOn']))
         ir_thread.start()
         threads.append(ir_thread)
         print("IR loop started")

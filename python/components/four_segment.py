@@ -12,7 +12,10 @@ publish_data_limit = 1
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+username = "admin"
+password = "admin"
 mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
 
 alarm_time = Queue()
 turn_off = Queue()
@@ -27,7 +30,7 @@ def publisher_task(event, _batch):
             _batch.clear()
             publish.multiple(local_batch, hostname=HOSTNAME, port=PORT)
             # print(local_batch)
-            print(f'published wake up alarm values')
+            print(f'published B4SD values')
         event.clear()
 
 publish_event = threading.Event()
@@ -46,7 +49,6 @@ def on_message(client, userdata, msg):
     data = json.loads(msg.payload.decode('utf-8'))
     print(data)
     if data["turn_off"] == "False":
-        print("alarm time")
         alarm_time.put(data["alarm_time"])
     else:
         turn_off.put(True)

@@ -129,7 +129,7 @@
       "name": "GLCD",
       "sda_pin": 2,
       "scl_pin": 3,
-      "simulated": true,
+      "simulated": false,
       "runsOn": "Pi2",
       "hostname": "localhost",
       "port": 1883,
@@ -145,7 +145,7 @@
     },
     "GSG": {
       "name": "GSG",
-      "simulated": true,
+      "simulated": false,
       "sda_pin": 2,
       "scl_pin": 3,
       "pin":6,
@@ -178,16 +178,16 @@
       "simulated": true,
       "pin":16,
       "runsOn": "Pi3",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "B4SD": {
       "name": "B4SD",
-      "simulated": true,
-      "segments": [11, 4, 23, 8, 7, 10, 18, 25],
-      "digits": [14, 15, 17, 24],
+      "simulated": false,
+      "segments": [11, 16, 23, 8, 7, 10, 18, 25],
+      "digits": [22, 27, 17, 24],
       "runsOn": "Pi3",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "BRGB": {

@@ -64,6 +64,7 @@ def run_rgb_loop(input_queue, rgb, delay, stop_event, name, runsOn):
     while True:
         if input_queue.qsize() > 0:
             user_input = input_queue.get()
+            print("input from actuator: ",user_input)
             if user_input == "OK":
                 rgb.turn_off()
                 #TODO: da li treba callback?

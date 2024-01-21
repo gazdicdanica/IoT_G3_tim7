@@ -8,27 +8,13 @@ import json, time, threading
 import paho.mqtt.publish as publish
 import datetime
 
-app = Flask(__name__)
-CORS(app)
-socketio = SocketIO(app)
-socketio.init_app(app, cors_allowed_origins="*")
 
-@socketio.on('subscribe')
-def handle_subscribe(topic):
-    join_room(topic)
-    print(f"Subscribed to {topic}")
-
-
-# InfluxDB Configuration
-token = "0b2rnAQWMcBP8u6_S5iO2Gc3MxoJj0offA9lwK0X_nFWlyQduR2tBlmBeIJDUb-b_OfXXj4T0JOfa-WctndbaA=="
-org = "iot"
-url = "http://localhost:8086"
-bucket = "iote"
-influxdb_client = InfluxDBClient(url=url, token=token, org=org)
-
-mqtt_client = mqtt.Client()
-mqtt_client.connect("localhost", 1883)
-mqtt_client.loop_start()
+socketio = None
+mqtt_client = None
+influxdb_client = None
+org = ""
+url = ""
+bucket = ""
 
 ALARM_TRIGGERED = False
 SYSTEM_ACTIVATED = True
@@ -45,14 +31,14 @@ ds_readings = []
 ds_readings_len_treshold = 10
 ds_threshold_percentage = 50
 
-
 def send_ws_message(topic, message):
-    socketio.emit('message', message, room=topic)
+    print("Sending web socket message: ", message, topic)
+    socketio.emit(topic, message)
 
 
 def send_message(topic, message):
     print("Sending message: ", message, topic)
-    publish.single(topic, message, hostname="localhost", port=1883)
+    publish.single(topic, message, hostname="192.168.1.103", port=1883)
 
 def send_alarm():
     global ALARM_TRIGGERED
@@ -92,13 +78,13 @@ def on_connect(client, userdata, flags, rc):
 
     client.subscribe("GSG")
     client.subscribe("ALERT")
+    client.subscribe("B4SD")
+    client.subscribe("IR")
 
 
 def on_message(client, userdata, msg):
     data = json.loads(msg.payload.decode('utf-8'))
     topic = msg.topic
-    print("TOPIC")
-    print(topic)
     parse_data(data, topic)
 
 
@@ -143,24 +129,18 @@ def parse_ir(data):
     print(data)
     if isinstance(data, str):
         data = json.loads(data)
-    values = data.get('values', {})
-    button_pressed = values.get('button_pressed', "")
-    send_message("rgb_value", json.dumps({"button_pressed": button_pressed}))
+    button_pressed = data.get('button_pressed', "")
+    send_message("rgb_data", json.dumps({"button_pressed": button_pressed}))
     send_ws_message("rgb_value", json.dumps({"button_pressed": button_pressed}))
 
 
 def parse_b4sd(data):
-    print(data)
     if isinstance(data, str):
         data = json.loads(data)
-    values = data.get('values', {})
-    alarm = values.get('alarm', 0)
-    if alarm is True:
-        # TODO: send message to BB
-        send_message("ALARM", json.dumps({"alarm": 1, "wake_up": True}))
+    alarm = data.get('alarm', 0)
+    if alarm == 1:
+        send_message("wake_up", json.dumps({"alarm": 1}))
         send_ws_message("wake_up", json.dumps(data))
-    else:
-        send_ws_message("time", values.get('time', 0))
 
 def parse_dms(data):
     global ALARM_TRIGGERED, SYSTEM_ACTIVATED
@@ -205,6 +185,7 @@ def parse_ds(data):
         percentage_truthy = (truthy_count / total_count) * 100
         ds_readings = []
         return percentage_truthy >= ds_threshold_percentage
+
 
 def parse_pir(data):
     global dpir1_motion_data, dpir1_treshold_percentage, dpir1_motion_data_len_treshold
@@ -268,7 +249,7 @@ def trigger_alarm(trigger, pi, simulated):
 
 
 def write_to_db(data):
-    print(data)
+    # print(data)
     write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
     point = (
         Point(data["measurement"])
@@ -282,10 +263,6 @@ def write_to_db(data):
     point.field("timestamp", data["timestamp"])
 
     write_api.write(bucket=bucket, org=org, record=point)
-    
-
-mqtt_client.on_connect = on_connect
-mqtt_client.on_message = on_message
 
 
 def to_time(date_string): 
@@ -295,47 +272,89 @@ def to_time(date_string):
         raise ValueError('{} is not valid time in the format HH:mm'.format(date_string))
 
 
+def create_app():
+    global socketio, mqtt_client, influxdb_client, bucket, org
+    app = Flask(__name__)
 
-@app.route('/')
-def hello():
-    return 'Hello, World!'
+    # Configuration options
+    app.config['DEBUG'] = True
+
+    CORS(app)
+    socketio = SocketIO(app)
+    socketio.init_app(app, cors_allowed_origins="*")
+
+    # InfluxDB Configuration
+    token = "MIrHD7Jt64G1u8BmAC3nmhhYqJ4P12gp953nT6-Khz-DRofp_tz5FNPHXfwUFrIqckQzP1H8vLo7t-cNfvp7hA=="
+    org = "iot"
+    url = "http://localhost:8086"
+    bucket = "iote"
+    influxdb_client = InfluxDBClient(url=url, token=token, org=org)
+
+    mqtt_client = mqtt.Client()
+    mqtt_client.connect("192.168.1.103", 1883)
+    mqtt_client.enable_logger()
+    mqtt_client.loop_start()
+    username = "admin"
+    password = "admin"
+
+    mqtt_client.username_pw_set(username, password)
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+
+    @app.route('/')
+    def hello():
+        return 'Hello, World!'
 
 
-@app.route('/api/set_wakeup_time', methods=['GET'])
-def set_wakeup_time():
-    try:
-        time = to_time(request.args.get('time'))
-        print(f"Setting wakeup time to {time}")
-        send_message("wake_up_data", json.dumps({"alarm_time": str(time), "turn_off": str(False)}))
-        return jsonify({}), 200
-    except ValueError as ex:
-        return jsonify({'error': str(ex)}), 400 
-    
-@app.route('/api/turn_off_alarm', methods=['GET'])
-def turn_off_alarm():
-    try:
-        send_message("ALARM", json.dumps({"alarm": 0, "wake_up": True}))
-        send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
-        return jsonify({}), 200
-    except ValueError as ex:
-        return jsonify({'error': str(ex)}), 400
-    
-
-@app.route("/api/change_rgb", methods=["PUT"])
-def change_rgb():
-    try:
-        data = request.get_json()
-        color = data.get('color')
+    @app.route('/api/set_wakeup_time', methods=['GET'])
+    def set_wakeup_time():
+        try:
+            time = to_time(request.args.get('time'))
+            print(f"Setting wakeup time to {time}")
+            send_message("wake_up_data", json.dumps({"alarm_time": str(time), "turn_off": str(False)}))
+            return jsonify({}), 200
+        except ValueError as ex:
+            return jsonify({'error': str(ex)}), 400 
         
-        if color is None:
-            raise ValueError("Color parameter is missing in the request body")
+    @app.route('/api/turn_off_alarm', methods=['GET'])
+    def turn_off_alarm():
+        try:
+            send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
+            send_message("wake_up", json.dumps({"alarm": 0}))
+            return jsonify({}), 200
+        except ValueError as ex:
+            return jsonify({'error': str(ex)}), 400
+        
+    @app.route("/api/change_rgb", methods=["PUT"])
+    def change_rgb():
+        try:
+            data = request.get_json()
+            color = data.get('color')
+            
+            if color is None:
+                raise ValueError("Color parameter is missing in the request body")
 
-        print(f"Changing rgb to {color}")
-        send_message("rgb_data", color)
-        return jsonify({}), 200
-    except ValueError as ex:
-        return jsonify({'error': str(ex)}), 400
+            print(f"Changing rgb to {color}")
+            send_message("rgb_data", json.dumps({"button_pressed": color}))
+            return jsonify({}), 200
+        except ValueError as ex:
+            return jsonify({'error': str(ex)}), 400
+        
+    # @app.rout("/api/change_rgb", methods=)
+    return app
 
 
 if __name__ == '__main__':
+    global app
+    app = create_app()
     app.run()
+
+
+@socketio.on('subscribe')
+def handle_subscribe(topic):
+    join_room(topic)
+    # print(f"Subscribed to {topic}")
+
+
+
+
