@@ -89,9 +89,9 @@ def run_all_ultrasonic(threads, stop_event):
     run_ultrasonic(settings['DUS2'], threads, stop_event)
 
 def run_display(threads, stop_event):
-    run_4_segment(settings["B4SD"], threads, stop_event)
-    # run_rgb(settings["BRGB"], threads, stop_event)
-    # run_ir(settings["BIR"], threads, stop_event)
+    # run_4_segment(settings["B4SD"], threads, stop_event)
+    run_rgb(settings["BRGB"], threads, stop_event)
+    run_ir(settings["BIR"], threads, stop_event)
     # run_lcd_loop(settings['GLCD'], threads, stop_event)
 
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
         # run_all_dht(threads, stop_event)
         # run_all_pir(threads, stop_event)
-        run_all_buttons(threads, stop_event)
+        # run_all_buttons(threads, stop_event)
         # run_all_ultrasonic(threads, stop_event)
         # run_all_gyro(threads, stop_event)
         run_display(threads, stop_event)

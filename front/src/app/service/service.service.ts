@@ -18,6 +18,6 @@ export class ServiceService {
   }
 
   change_rgb_color(color: any){
-    return this.http.put(environment.apiHost + '/api/change_rgb', {"color": color});
+    return this.http.put(environment.apiHost + 'api/change_rgb', {"color": color});
   }
 }

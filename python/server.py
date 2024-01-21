@@ -324,6 +324,23 @@ def create_app():
             return jsonify({}), 200
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400
+        
+    @app.route("/api/change_rgb", methods=["PUT"])
+    def change_rgb():
+        try:
+            data = request.get_json()
+            color = data.get('color')
+            
+            if color is None:
+                raise ValueError("Color parameter is missing in the request body")
+
+            print(f"Changing rgb to {color}")
+            send_message("rgb_data", json.dumps({"button_pressed": color}))
+            return jsonify({}), 200
+        except ValueError as ex:
+            return jsonify({'error': str(ex)}), 400
+        
+    # @app.rout("/api/change_rgb", methods=)
     return app
 
 
