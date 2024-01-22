@@ -31,8 +31,7 @@ def on_message(client, userdata, msg):
     global NAME
     data = json.loads(msg.payload.decode('utf-8'))
     print(data)
-    pir_name = data['name']
-    if pir_name[-1] == NAME[-1]:
+    if data['name'][-1] == NAME[-1]:
         # pir detected motion
         change = check_distance()
         publish.single(NAME, json.dumps({"change": change}), hostname=HOSTNAME, port=PORT)
