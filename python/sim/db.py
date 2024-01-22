@@ -9,9 +9,10 @@ def switch_buzzer():
     buzzer_status = not buzzer_status
 
 
-def run_buzzer_simulator(should_turn_on_db, should_turn_on_bb, user_input_queue, delay, callback, stop_event, name, runsOn):
+def run_buzzer_simulator(should_turn_on_db, should_turn_on_bb, input_queue, delay, callback, stop_event, name, runsOn):
     global buzzer_status
     should_turn_on = Queue()
+    wake_up = False
     if name == "DB":
         print("Starting DB simulator")
         should_turn_on = should_turn_on_db
@@ -28,10 +29,14 @@ def run_buzzer_simulator(should_turn_on_db, should_turn_on_bb, user_input_queue,
             else:
                 print("#Buzzer ", name, " OFF")
                 buzzer_status = False
-        elif user_input_queue.qsize() > 0:
-            user_input = user_input_queue.get()
-            if user_input == 'b':
-                switch_buzzer()
+        if input_queue.qsize() > 0 and name == "BB":
+            wake_up = input_queue.get()
+            if wake_up:
+                print("Buzzer ", name, " ON")
+                buzzer_status = True
+            else:
+                print("#Buzzer ", name, " OFF")
+                buzzer_status = False
         callback(buzzer_status, name, True, runsOn)
 
         if stop_event.is_set():

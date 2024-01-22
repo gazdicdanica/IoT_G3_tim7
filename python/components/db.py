@@ -31,9 +31,11 @@ def on_message(client, userdata, msg):
     global should_turn_on
     data = json.loads(msg.payload.decode('utf-8'))
     print(data)
-    if not msg.topic == "wake_up":
+    if msg.topic == "wake_up":
+        wake_up_bb.put(data["alarm"] == 1)
+    else:
         should_turn_on_db.put(data["alarm"] == 1)    
-    should_turn_on_bb.put(data["alarm"] == 1)
+        should_turn_on_bb.put(data["alarm"] == 1)
 
 
 def publisher_task(event, _batch):
@@ -79,7 +81,7 @@ def db_callback(buzzer_on, name, simulated, runsOn):
 
 
 def run_db(user_input_queue, settings, threads, stop_event):
-    global HOSTNAME, PORT, should_turn_on_bb, should_turn_on_db, mqtt_client
+    global HOSTNAME, PORT, should_turn_on_bb, should_turn_on_db, wake_up_bb, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
     mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
@@ -87,14 +89,14 @@ def run_db(user_input_queue, settings, threads, stop_event):
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
     if settings["simulated"]:
-        db_thread = threading.Thread(target=run_buzzer_simulator, args=(should_turn_on_db, should_turn_on_bb, user_input_queue, 4, db_callback, stop_event, settings['name'], settings['runsOn']))
+        db_thread = threading.Thread(target=run_buzzer_simulator, args=(should_turn_on_db, should_turn_on_bb, wake_up_bb, 4, db_callback, stop_event, settings['name'], settings['runsOn']))
         db_thread.start()
         threads.append(db_thread)
     else:
         from actuators.db import run_db_loop, DoorBuzzer
         print("Starting DB loop")
         db = DoorBuzzer(settings['name'], settings['pin'])
-        db_thread = threading.Thread(target=run_db_loop, args=(should_turn_on_db, should_turn_on_bb, user_input_queue, db, 2, db_callback, stop_event, settings['name'], settings['runsOn']))
+        db_thread = threading.Thread(target=run_db_loop, args=(should_turn_on_db, should_turn_on_bb, wake_up_bb, db, 2, db_callback, stop_event, settings['name'], settings['runsOn']))
         db_thread.start()
         threads.append(db_thread)
         print("DB loop started")
