@@ -31,6 +31,8 @@ ds_readings = []
 ds_readings_len_treshold = 10
 ds_threshold_percentage = 50
 
+people_count = 0
+
 def send_ws_message(topic, message):
     print("Sending web socket message: ", message, topic)
     socketio.emit(topic, message)
@@ -103,7 +105,7 @@ def parse_data(data, topic=None):
                 send_message("GDHT_Data", msg)
             write_to_db(data)
         elif topic == "DPIR1":
-            if parse_pir(data):
+            if parse_pir(data, "DPIR1"):
                 send_message("DL_Data", json.dumps({"motion_detected": 1}))
             write_to_db(data)
         elif topic == "DS1" or topic == "DS2":
@@ -119,11 +121,24 @@ def parse_data(data, topic=None):
             parse_b4sd(data)
         elif topic == "IR":
             parse_ir(data)
+        elif topic == "DUS1" or topic == "DUS2":
+            parse_dus(data)
+        elif topic.startswith("RPIR"):
+            pass
         else:
             write_to_db(data)
     elif topic == "DMS":
         parse_dms(data)
 
+
+def parse_dus(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+    change = data.get('change', 0)
+    if change == -1 and people_count == 0:
+        print("No people to exit")
+        return
+    people_count += change
 
 def parse_ir(data):
     print(data)
@@ -187,13 +202,15 @@ def parse_ds(data):
         return percentage_truthy >= ds_threshold_percentage
 
 
-def parse_pir(data):
+def parse_pir(data, name):
     global dpir1_motion_data, dpir1_treshold_percentage, dpir1_motion_data_len_treshold
     try:
         if isinstance(data, str):
             data = json.loads(data)
         values = data.get('values', {})
         motion_detected = values.get('motion_detected', 0)
+        if(motion_detected == 1.0):
+            send_message("DUS_Data", json.dumps({"motion_detected": 1, "name": name}))
         dpir1_motion_data.append(motion_detected)
     except:
         print("Error decoding JSON data")
