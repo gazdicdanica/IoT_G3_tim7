@@ -31,6 +31,8 @@ ds_readings = []
 ds_readings_len_treshold = 10
 ds_threshold_percentage = 50
 
+people_count = 0
+
 def send_ws_message(topic, message):
     print("Sending web socket message: ", message, topic)
     socketio.emit(topic, message)
@@ -103,8 +105,12 @@ def parse_data(data, topic=None):
                 send_message("GDHT_Data", msg)
             write_to_db(data)
         elif topic == "DPIR1":
+            parse_pir_(data)
             if parse_pir(data):
                 send_message("DL_Data", json.dumps({"motion_detected": 1}))
+            write_to_db(data)
+        elif topic == "DPIR2" or topic.startswith("RPIR"):
+            parse_pir_(data)
             write_to_db(data)
         elif topic == "DS1" or topic == "DS2":
             if parse_ds(data):
@@ -119,11 +125,22 @@ def parse_data(data, topic=None):
             parse_b4sd(data)
         elif topic == "IR":
             parse_ir(data)
+        elif topic == "DUS1" or topic == "DUS2":
+            parse_dus(data)
         else:
             write_to_db(data)
     elif topic == "DMS":
         parse_dms(data)
 
+
+def parse_dus(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+    change = data.get('change', 0)
+    if change == -1 and people_count == 0:
+        print("No people to exit")
+        return
+    people_count += change
 
 def parse_ir(data):
     print(data)
@@ -186,6 +203,21 @@ def parse_ds(data):
         ds_readings = []
         return percentage_truthy >= ds_threshold_percentage
 
+
+def parse_pir_(data):
+    global people_count
+    try:
+        if isinstance(data, str):
+            data = json.loads(data)
+        values = data.get('values', {})
+        motion_detected = values.get('motion_detected', 0)
+        if motion_detected == 1.0:
+            if data['name'][0] == "D":
+                send_message("DUS_Data", json.dumps({"motion_detected": 1, "name": data['name']}))
+            elif people_count == 0:
+                trigger_alarm(data['name'], data["runsOn"], data["simulated"])
+    except:
+        print("Error decoding JSON data")
 
 def parse_pir(data):
     global dpir1_motion_data, dpir1_treshold_percentage, dpir1_motion_data_len_treshold

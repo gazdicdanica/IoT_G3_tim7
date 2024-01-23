@@ -1,6 +1,7 @@
 import time, threading, json
 from sim.pir import run_pir_simulator
 import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 
 sensor_data_lock = threading.Lock()
@@ -10,6 +11,10 @@ publish_data_limit = 5
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+username = "admin"
+password = "admin"
+mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
 
 
 def publisher_task(event, _batch):
@@ -51,6 +56,8 @@ def pir_callback(motion_detected, name, simulated, runsOn):
     with counter_lock:
         batch.append((name, json.dumps(data), 0, True))
         publish_data_counter += 1
+        if motion_detected:
+            publish.single(data['name'], json.dumps(data), hostname=HOSTNAME, port=PORT)
 
     if publish_data_counter >= publish_data_limit:
         publish_event.set()
