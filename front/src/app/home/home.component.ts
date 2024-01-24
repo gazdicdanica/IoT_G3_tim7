@@ -15,6 +15,7 @@ import { FrameComponent } from '../frame/frame.component';
 export class HomeComponent {
 
   alarmDialog!: MatDialogRef<AlarmComponent>;
+  peopleCount: number = 0;
 
   constructor(private wsService: WebsocketService, private dialog: MatDialog){}
 
@@ -37,6 +38,10 @@ export class HomeComponent {
       this.wsService.subscribeAlarmTopic((message: any) => {
         if(message["alarm"] == 1) this.alarm();
         else this.alarmDialog.close();
+      });
+
+      this.wsService.subscribePeopleCountTopic((message: any) => {
+        this.peopleCount = message["people_count"];
       });
     }).catch((error: any) => {
       console.error('Error connecting to WebSocket:', error);

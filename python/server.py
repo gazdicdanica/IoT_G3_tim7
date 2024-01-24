@@ -135,6 +135,7 @@ def parse_data(data, topic=None):
 
 
 def parse_dus(data):
+    global people_count
     if isinstance(data, str):
         data = json.loads(data)
     change = data.get('change', 0)
@@ -142,6 +143,7 @@ def parse_dus(data):
         print("No people to exit")
         return
     people_count += change
+    send_ws_message("people_count", json.dumps({"people_count": people_count}))
 
 def parse_ir(data):
     print(data)
@@ -174,6 +176,7 @@ def parse_dms(data):
                 if ALARM_TRIGGERED:
                     ALARM_TRIGGERED = False
                     send_ws_message("ALARM", json.dumps({"alarm": 0}))
+                    untrigger_alarm()
                 else:
                     SYSTEM_ACTIVATED = False
             else:
@@ -266,14 +269,15 @@ def parse_gdht(data):
 
 def trigger_alarm(trigger, pi, simulated):
     send_message("ALARM", json.dumps({"alarm": 1}))
-    
+
+    # TODO: why is it not writing trigger?!?!?!
     t = time.strftime('%H:%M:%S', time.localtime())
     data = {
         "measurement": "ALARM",
         "name": "ALARM",
-        "trigger": trigger,
-        "simulated": simulated,
-        "runsOn": pi,
+        # "trigger": trigger,
+        # "simulated": simulated,
+        # "runsOn": pi,
         "values": {
             "alarm": 1
         },
@@ -283,6 +287,19 @@ def trigger_alarm(trigger, pi, simulated):
     write_to_db(data)
 
     send_ws_message("ALARM", json.dumps({"alarm": 1}))
+
+def untrigger_alarm():
+    t = time.strftime('%H:%M:%S', time.localtime())
+    data = {
+        "measurement": "ALARM",
+        "name": "ALARM",
+        "values": {
+            "alarm": 0
+        },
+        "code": 200,
+        "timestamp": t
+    }
+    write_to_db(data)
 
 
 def write_to_db(data):
@@ -383,6 +400,7 @@ def create_app():
             global ALARM_TRIGGERED
             ALARM_TRIGGERED = False
             send_message("ALARM", json.dumps({"alarm": 0}))
+            untrigger_alarm()
             return jsonify({}), 200
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400

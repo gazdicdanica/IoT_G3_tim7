@@ -53,6 +53,13 @@ export class WebsocketService {
     });
   }
 
+  subscribePeopleCountTopic(callback: (message: any) => void) {
+    return this.socket.on("people_count", (message: any) => {
+      console.log('Received message:', message);
+      callback(JSON.parse(message));
+    });
+  }
+
   disconnect(): void {
     if (this.socket && this.socket.connected) {
       this.socket.disconnect();

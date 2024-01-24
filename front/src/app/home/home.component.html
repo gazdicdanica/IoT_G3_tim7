@@ -1,6 +1,23 @@
 
 <div class="wrapper">
     <img src="../../assets/res.jpg">
+    <div class="legend">
+        <ul>
+            <h4>Legend</h4>
+            <li><span class="dot pi1"></span><span class="legend-text">PI1</span></li>
+            <li><span class="dot pi2"></span><span class="legend-text">PI2</span></li>
+            <li><span class="dot pi3"></span><span class="legend-text">PI3</span></li>
+        </ul>
+    </div>
+
+    <div class="people-count">
+        <h3>People inside</h3>
+        <h2>{{peopleCount}}</h2>
+    </div>
+
+    <div class="history">
+        <button mat-raised-button color="warn" (click)="openFrame(21)">Alarm chart</button>
+    </div>
     <!-- PI1 -->
     <div class="dot pi1" id="dl" matTooltip="Door Light" (click)="openFrame(6)"></div>
     <div class="dot pi1" id="dpir1" matTooltip="Door Motion Sensor 1" (click)="openFrame(1)"></div>
