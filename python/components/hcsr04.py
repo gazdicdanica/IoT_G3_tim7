@@ -4,7 +4,6 @@ import threading, time, json
 import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt
 
-
 sensor_data_lock = threading.Lock()
 batch = []
 publish_data_counter = 0
@@ -51,6 +50,10 @@ def check_distance():
             return 1
     return 0
 
+username = "admin"
+password = "admin"
+mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
 
 def publisher_task(event, _batch):
     global publish_data_counter, publish_data_limit
@@ -99,7 +102,7 @@ def ultrasonic_callback(distance, name, simulated, runsOn):
 
 
 def run_ultrasonic(settings, threads, stop_event):
-    global HOSTNAME, PORT, NAME
+    global HOSTNAME, PORT, NAME, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
     NAME = settings["name"]

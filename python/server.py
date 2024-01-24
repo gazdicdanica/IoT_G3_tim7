@@ -40,7 +40,7 @@ def send_ws_message(topic, message):
 
 def send_message(topic, message):
     print("Sending message: ", message, topic)
-    publish.single(topic, message, hostname="192.168.1.103", port=1883)
+    publish.single(topic, message, hostname="192.168.1.100", port=1883)
 
 def send_alarm():
     global ALARM_TRIGGERED
@@ -87,6 +87,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     data = json.loads(msg.payload.decode('utf-8'))
     topic = msg.topic
+    print(topic, data)
     parse_data(data, topic)
 
 
@@ -134,6 +135,7 @@ def parse_data(data, topic=None):
 
 
 def parse_dus(data):
+    global people_count
     if isinstance(data, str):
         data = json.loads(data)
     change = data.get('change', 0)
@@ -141,6 +143,7 @@ def parse_dus(data):
         print("No people to exit")
         return
     people_count += change
+    send_ws_message("people_count", json.dumps({"people_count": people_count}))
 
 def parse_ir(data):
     print(data)
@@ -170,10 +173,13 @@ def parse_dms(data):
         if action == 1:
             print(ALARM_TRIGGERED, SYSTEM_ACTIVATED)
             if SYSTEM_ACTIVATED:
-                SYSTEM_ACTIVATED = False
-            elif ALARM_TRIGGERED:
-                ALARM_TRIGGERED = False
-            elif not SYSTEM_ACTIVATED:
+                if ALARM_TRIGGERED:
+                    ALARM_TRIGGERED = False
+                    send_ws_message("ALARM", json.dumps({"alarm": 0}))
+                    untrigger_alarm()
+                else:
+                    SYSTEM_ACTIVATED = False
+            else:
                 SYSTEM_ACTIVATED = True
         else:
             print("Wrong pin")
@@ -263,16 +269,32 @@ def parse_gdht(data):
 
 def trigger_alarm(trigger, pi, simulated):
     send_message("ALARM", json.dumps({"alarm": 1}))
-    
+
+    # TODO: why is it not writing trigger?!?!?!
     t = time.strftime('%H:%M:%S', time.localtime())
     data = {
         "measurement": "ALARM",
         "name": "ALARM",
-        "trigger": trigger,
-        "simulated": simulated,
-        "runsOn": pi,
+        # "trigger": trigger,
+        # "simulated": simulated,
+        # "runsOn": pi,
         "values": {
             "alarm": 1
+        },
+        "code": 200,
+        "timestamp": t
+    }
+    write_to_db(data)
+
+    send_ws_message("ALARM", json.dumps({"alarm": 1}))
+
+def untrigger_alarm():
+    t = time.strftime('%H:%M:%S', time.localtime())
+    data = {
+        "measurement": "ALARM",
+        "name": "ALARM",
+        "values": {
+            "alarm": 0
         },
         "code": 200,
         "timestamp": t
@@ -323,7 +345,7 @@ def create_app():
     influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
     mqtt_client = mqtt.Client()
-    mqtt_client.connect("192.168.1.103", 1883)
+    mqtt_client.connect("192.168.1.100", 1883)
     mqtt_client.enable_logger()
     mqtt_client.loop_start()
     username = "admin"
@@ -348,8 +370,8 @@ def create_app():
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400 
         
-    @app.route('/api/turn_off_alarm', methods=['GET'])
-    def turn_off_alarm():
+    @app.route('/api/turn_off_wakeup', methods=['GET'])
+    def turn_off_wakeup():
         try:
             send_message("wake_up_data", json.dumps({"alarm_time": "", "turn_off": str(True)}))
             send_message("wake_up", json.dumps({"alarm": 0}))
@@ -372,9 +394,21 @@ def create_app():
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400
         
-    # @app.rout("/api/change_rgb", methods=)
+    @app.route("/api/turn_off_alarm", methods=["GET"])
+    def turn_off_alarm():
+        try:
+            global ALARM_TRIGGERED
+            ALARM_TRIGGERED = False
+            send_message("ALARM", json.dumps({"alarm": 0}))
+            untrigger_alarm()
+            return jsonify({}), 200
+        except ValueError as ex:
+            return jsonify({'error': str(ex)}), 400
+        
+    
     return app
 
+    
 
 if __name__ == '__main__':
     global app

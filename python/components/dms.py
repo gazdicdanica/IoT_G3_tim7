@@ -12,7 +12,11 @@ counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
 pincode = ""
+username="admin"
+password="admin"
 mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
+
 ALARM_TRIGGERED = False
 SYSTEM_ACTIVATED = False
 
@@ -88,7 +92,7 @@ def dms_callback(wrong_pin, name, simulated, runsOn):
 
 
 def run_dms(settings, threads, stop_event):
-    global HOSTNAME, PORT, pincode
+    global HOSTNAME, PORT, pincode, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
     pincode = settings['pincode']

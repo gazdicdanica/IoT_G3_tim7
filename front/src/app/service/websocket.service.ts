@@ -46,24 +46,23 @@ export class WebsocketService {
     });
   }
 
+  subscribeAlarmTopic(callback: (message: any) => void) {
+    return this.socket.on("ALARM", (message: any) => {
+      console.log('Received message:', message);
+      callback(JSON.parse(message));
+    });
+  }
+
+  subscribePeopleCountTopic(callback: (message: any) => void) {
+    return this.socket.on("people_count", (message: any) => {
+      console.log('Received message:', message);
+      callback(JSON.parse(message));
+    });
+  }
+
   disconnect(): void {
     if (this.socket && this.socket.connected) {
       this.socket.disconnect();
     }
   }
-  // disconnect() {
-  //   if (this.stompClient !== null) {
-  //     this.stompClient.disconnect();
-  //   }
-  // }
-  
-  // closeConnection(stomp : any){
-  //   try{
-  //     stomp.disconnect();
-  //   }catch(e){
-  //     return;
-  //   }
-    
-    
-  // }
 }

@@ -1,6 +1,7 @@
 from sim.dht11 import run_dht_simulator
 import threading, time, json
 import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 
 sensor_data_lock = threading.Lock()
@@ -10,6 +11,11 @@ publish_data_limit = 5
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+
+username="admin"
+password="admin"
+mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
 
 
 def publisher_task(event, _batch):
@@ -37,30 +43,33 @@ def dht_callback(humidity, temperature, code, name, simulated, runsOn):
 
     t = time.localtime()
     t = time.strftime('%H:%M:%S', t)
-    data = {
-        "measurement": name,
-        "name": name,
-        "simulated": simulated,
-        "runsOn": runsOn,
-        "values": {
-            "temperature": temperature,
-            "humidity": humidity,
-        },
-        "code": code,
-        "timestamp": t
-    }
-    with counter_lock:
-        batch.append((name, json.dumps(data), 0, True))
-        publish_data_counter += 1
+    if temperature > -20 and temperature < 60 and humidity > 0 and humidity < 60:
+        data = {
+            "measurement": name,
+            "name": name,
+            "simulated": simulated,
+            "runsOn": runsOn,
+            "values": {
+                "temperature": float(temperature),
+                "humidity": float(humidity),
+            },
+            "code": code,
+            "timestamp": t
+        }
+        with counter_lock:
+            batch.append((name, json.dumps(data), 0, True))
+            publish_data_counter += 1
 
-    if publish_data_counter >= publish_data_limit:
-        publish_event.set()
+        if publish_data_counter >= publish_data_limit:
+            publish_event.set()
 
 
 def run_dht(settings, threads, stop_event):
-    global HOSTNAME, PORT
+    global HOSTNAME, PORT, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
     if settings['simulated']:
         print("Starting dht1 sumulator")
         dht1_thread = threading.Thread(target = run_dht_simulator, args=(1, dht_callback, stop_event, settings['name'], settings['runsOn']))

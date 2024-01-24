@@ -8,7 +8,11 @@ from time import sleep, strftime
 from datetime import datetime
 import json
 
+username="admin"
+password="admin"
 mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
+
 temp = 0.0
 humidity = 0.0
 HOSTNAME = ""

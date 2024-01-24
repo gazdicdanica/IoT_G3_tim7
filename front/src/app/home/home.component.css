@@ -6,20 +6,56 @@
     height: 100vh;
 }
 
-/* .col{
-    width: 25%;
-    aspect-ratio: 1/1;
-    border: 1px solid #9b27b022;
-    border-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.legend{
+    position: absolute;
+    top: 10px;
+    left: 20px;
 }
 
-.col:hover{
-    background-color:#9b27b034;
-    cursor: pointer;
-} */
+.legend ul{
+    list-style: none;
+    border: 1px solid rgba(135, 132, 132, 0.51);
+    border-radius: 5px;
+    padding: 20px 40px !important;
+    box-shadow: 0px 0px 10px 0px rgba(189, 188, 188, 0.47);
+
+}
+
+.legend ul li{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.legend ul li span:hover{
+    cursor: default;
+}
+
+.legend-text{
+    margin-left: 20px;
+}
+
+.people-count{
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(135, 132, 132, 0.51);
+    box-shadow: 0px 0px 10px 0px rgba(189, 188, 188, 0.47);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.history{
+    position:  absolute;
+    bottom: 25px;
+    right: 20px;
+}
 
 .wrapper img{
     height: 100vh;
@@ -59,125 +95,125 @@
     cursor: pointer;
 
 }
-
+/* PI1 */
 #dl{
-    bottom: 142px;
-    left: 535px;
+    bottom: 120px;
+    left: 560px;
 }
 
 #dpir1{
-    bottom: 165px;
-    left: 535px;
+    bottom: 145px;
+    left: 560px;
 }
 
 #dus1{
-    bottom: 190px;
-    left: 535px;
+    bottom: 170px;
+    left: 560px;
 }
 
 #ds1{
-    bottom: 212px;
-    left: 540px;
+    bottom: 195px;
+    left: 560px;
 }
 
 #db{
-    bottom: 255px;
-    left: 590px;
+    bottom: 235px;
+    left: 625px;
 }
 
 #dms{
-    bottom: 325px;
-    left: 535px;
+    bottom: 305px;
+    left: 560px;
 }
 
 #rpir1{
-    bottom: 255px;
-    left: 490px;
+    bottom: 235px;
+    left: 510px;
 }
 
 #rpir2{
-    top: 285px;
+    top: 295px;
     left: 450px;
 }
 
 #rdht1{
-    bottom: 165px;
-    left: 450px;
+    bottom: 145px;
+    left: 460px;
 }
 
 #rdht2{
-    bottom: 280px;
-    left: 455px;
+    bottom: 265px;
+    left: 460px;
 }
 
-
+/* PI2 */
 #ds2{
-    bottom: 335px;
-    left: 675px;
+    bottom: 320px;
+    left: 720px;
 }
 
 #dus2{
-    bottom: 325px;
-    left: 697px;
+    bottom: 320px;
+    left: 745px;
 }
 
 #glcd{
-    bottom: 305px;
-    left: 675px;
+    bottom: 290px;
+    left: 720px;
 }
 
 #gdht{
-    bottom: 305px;
-    left: 697px;
+    bottom: 290px;
+    left: 745px;
 }
 
 #gsg{
-    bottom: 395px;
-    right: 735px;
+    bottom: 385px;
+    right: 675px;
 }
 
 #dpir2{
-    bottom: 370px;
-    left: 725px;
+    bottom: 360px;
+    right: 700px;
 }
 
 #rpir3{
-    top: 285px;
-    left: 605px;
+    top: 295px;
+    left: 640px;
 }
 
 #rdht3{
-    top: 285px;
-    left: 635px;
+    top: 295px;
+    left: 665px;
 }
 
-
+/* PI3 */
 #rpir4{
-    top: 50px;
-    left: 700px;
+    top: 45px;
+    right: 730px;
 }
 
 #rdht4{
     top: 45px;
-    right: 700px;
+    right: 645px;
 }
 
 #bb{
     top: 45px;
-    right: 610px;
+    right: 520px;
 }
 
 #b4sd{
     top: 45px;
-    right: 575px;
+    right: 480px;
 }
 
 #bir{
-    right: 735px;
+    right: 675px;
     top: 135px;
 }
 
 #brgb{
-    right: 650px;
+    right: 570px;
     top: 135px;
 }

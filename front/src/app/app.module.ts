@@ -12,6 +12,9 @@ import { ClockComponent } from './clock/clock.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WakeUpComponent } from './wake-up/wake-up.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { AlarmComponent } from './alarm/alarm.component';
+import { FrameComponent } from './frame/frame.component';
+import { SafePipe } from './pipe/safe.pipe';
 
 @NgModule({
   declarations: [
@@ -20,7 +23,10 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
     HomeComponent,
     RgbComponent,
     ClockComponent,
-    WakeUpComponent
+    WakeUpComponent,
+    AlarmComponent,
+    FrameComponent,
+    SafePipe
   ],
   imports: [
     BrowserModule,
