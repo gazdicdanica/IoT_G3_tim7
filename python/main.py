@@ -112,11 +112,11 @@ if __name__ == "__main__":
         run_user_input_threads(threads, stop_event)
 
         # run_all_dht(threads, stop_event)
-        # run_all_pir(threads, stop_event)
+        run_all_pir(threads, stop_event)
         # run_all_buttons(threads, stop_event)
-        # run_all_ultrasonic(threads, stop_event)
+        run_all_ultrasonic(threads, stop_event)
         # run_all_gyro(threads, stop_event)
-        run_display(threads, stop_event)
+        # run_display(threads, stop_event)
 
         while True:
             time.sleep(5)

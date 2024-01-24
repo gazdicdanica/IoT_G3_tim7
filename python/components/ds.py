@@ -1,6 +1,7 @@
 from sim.ds import run_ds_simulator
 import threading, time, json
 import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 
 sensor_data_lock = threading.Lock()
@@ -10,6 +11,11 @@ publish_data_limit = 5
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+username="admin"
+password="admin"
+mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
+
 
 
 def publisher_task(event, _batch):
@@ -56,9 +62,11 @@ def ds_callback(door_opened, name, simulated, runsOn):
 
 
 def run_ds(settings, threads, stop_event):
-    global HOSTNAME, PORT
+    global HOSTNAME, PORT, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
     if settings["simulated"]:
         print("Starting DS simulator")
         ds_thread = threading.Thread(target=run_ds_simulator, args=(4, ds_callback, stop_event, settings['name'], settings['runsOn']))

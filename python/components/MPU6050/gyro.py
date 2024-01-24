@@ -2,6 +2,7 @@
 from sim.gyro import run_gyro_simulator
 import threading, time, json
 import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 try:
     from sensors.gyro import MPU6050 
 except:
@@ -15,6 +16,11 @@ publish_data_limit = 5
 counter_lock = threading.Lock()
 HOSTNAME = ""
 PORT = 0
+
+username="admin"
+password="admin"
+mqtt_client = mqtt.Client()
+mqtt_client.username_pw_set(username, password)
 
 
 def publisher_task(event, _batch):
@@ -83,9 +89,11 @@ def notify_significant_change(name, runsOn, simulated):
 
 
 def run_gyro(settings, threads, stop_event):
-    global HOSTNAME, PORT
+    global HOSTNAME, PORT, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
     if settings['simulated']:
         print("Starting simulated gyro")
         gyro_thread = threading.Thread(target=run_gyro_simulator, args=(1, gyro_callback, stop_event, settings['name'], settings['runsOn'],))

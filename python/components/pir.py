@@ -64,9 +64,11 @@ def pir_callback(motion_detected, name, simulated, runsOn):
 
 
 def run_pir(settings, threads, stop_event):
-    global HOSTNAME, PORT
+    global HOSTNAME, PORT, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
+    mqtt_client.connect(HOSTNAME, PORT, keepalive=65535)
+    mqtt_client.loop_start()
     if settings['simulated']:
         print("Starting PIR simulator")
         pir_thread = threading.Thread(target=run_pir_simulator, args=(3, pir_callback, stop_event, settings['name'], settings['runsOn']))

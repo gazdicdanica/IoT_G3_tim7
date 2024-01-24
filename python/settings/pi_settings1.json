@@ -20,7 +20,7 @@
       "simulated": true,
       "pin": 22,
       "runsOn": "Pi1",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "RPIR2": {
@@ -28,7 +28,7 @@
       "simulated": true,
       "pin": 23,
       "runsOn": "Pi1",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "DPIR1": {
@@ -36,7 +36,7 @@
       "simulated": true,
       "pin": 24,
       "runsOn": "Pi1",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "DUS1": {
@@ -45,7 +45,7 @@
       "echo_pin": 25,
       "trigger_pin": 26,
       "runsOn": "Pi1",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "DS1": {
@@ -97,7 +97,7 @@
       "simulated": true,
       "pin": 27,
       "runsOn": "Pi2",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "GDHT": {
@@ -113,7 +113,7 @@
       "simulated": true,
       "pin": 23,
       "runsOn": "Pi2",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },   
     "DUS2": {
@@ -122,7 +122,7 @@
       "echo_pin": 26,
       "trigger_pin": 16,
       "runsOn": "Pi2",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "GLCD": {
@@ -162,7 +162,7 @@
       "simulated": true,
       "pin": 27,
       "runsOn": "Pi3",
-      "hostname": "localhost",
+      "hostname": "192.168.1.103",
       "port": 1883
     },
     "RDHT4": {
