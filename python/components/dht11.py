@@ -43,7 +43,7 @@ def dht_callback(humidity, temperature, code, name, simulated, runsOn):
 
     t = time.localtime()
     t = time.strftime('%H:%M:%S', t)
-    if temperature > -20 and temperature < 60 and humidity > 0 and humidity < 60:
+    if temperature > -20 and temperature < 60 and humidity > 0 and humidity < 60 and code == "DHTLIB_OK":
         data = {
             "measurement": name,
             "name": name,

@@ -103,7 +103,7 @@
     "GDHT": {
       "name": "GDHT",
       "simulated": true,
-      "pin": 22,
+      "pin": 14,
       "runsOn": "Pi2",
       "hostname": "localhost",
       "port": 1883
@@ -193,7 +193,7 @@
     "BRGB": {
       "name": "BRGB",
       "simulated": true,
-      "R_pin": 12,
+      "R_pin": 20,
       "G_pin": 13,
       "B_pin": 19,
       "runsOn": "Pi3",

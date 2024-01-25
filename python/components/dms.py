@@ -91,7 +91,7 @@ def dms_callback(wrong_pin, name, simulated, runsOn):
         }), hostname=HOSTNAME, port=PORT)
 
 
-def run_dms(settings, threads, stop_event):
+def run_dms(queue, settings, threads, stop_event):
     global HOSTNAME, PORT, pincode, mqtt_client
     HOSTNAME = settings['hostname']
     PORT = settings['port']
@@ -102,7 +102,7 @@ def run_dms(settings, threads, stop_event):
     mqtt_client.on_message = on_message
     if settings["simulated"]:
         print("Starting DMS simulator")
-        dms_thread = threading.Thread(target=run_dms_simulator, args=(3, dms_callback, stop_event, settings['name'], settings['runsOn']))
+        dms_thread = threading.Thread(target=run_dms_simulator, args=(queue, 3, dms_callback, stop_event, settings['name'], settings['runsOn'], settings['pincode']))
         dms_thread.start()
         threads.append(dms_thread)
         print("DMS simulator started")

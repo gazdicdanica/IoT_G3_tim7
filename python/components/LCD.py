@@ -62,6 +62,7 @@ def run_lcd_loop(settings, threads, stop_event):
         while(True):       
             #lcd.clear()
             lcd.setCursor(0,0)  # set cursor position
-            lcd.message( 'Temp: ' + temp + '\n' + 'Humid: ' + humidity)
-            print(temp, "_", humidity)
+            message = 'Temp: ' + str(temp) + '\n' + 'Humid: ' + str(humidity)
+            lcd.message(message)
+            # print(temp, "_", humidity)
             sleep(1)   

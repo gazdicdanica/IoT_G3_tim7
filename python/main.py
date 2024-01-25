@@ -26,6 +26,7 @@ except:
 light_queue = Queue()
 buzzer_queue = Queue()
 rgb_queue = Queue()
+dms_queue = Queue()
 settings = {}
 
 def run_user_input_threads(threads, stop_event):
@@ -47,6 +48,7 @@ def user_input_thread(stop_event):
             buzzer_queue.put(user_input)
         else: 
             rgb_queue.put(user_input)
+            dms_queue.put(user_input)
         time.sleep(0.1)
         if stop_event.is_set():
             break
@@ -77,7 +79,7 @@ def run_all_pir(threads, stop_event):
 
 def run_all_buttons(threads, stop_event):
     # run_ds(settings['DS1'], threads, stop_event)
-    # run_dms(settings['DMS'], threads, stop_event)
+    # run_dms(dms_queue, settings['DMS'], threads, stop_event)
     # run_dl(light_queue, settings['DL'], threads, stop_event)
     run_db(buzzer_queue, settings['DB'], threads, stop_event)
     # run_ds(settings['DS2'], threads, stop_event)

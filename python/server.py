@@ -87,7 +87,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     data = json.loads(msg.payload.decode('utf-8'))
     topic = msg.topic
-    print(topic, data)
+    # print(topic, data)
     parse_data(data, topic)
 
 
@@ -146,7 +146,7 @@ def parse_dus(data):
     send_ws_message("people_count", json.dumps({"people_count": people_count}))
 
 def parse_ir(data):
-    print(data)
+    # print(data)
     if isinstance(data, str):
         data = json.loads(data)
     button_pressed = data.get('button_pressed', "")
@@ -169,17 +169,20 @@ def parse_dms(data):
             data = json.loads(data)
         values = data.get('values', {})
         action = values.get('action', 0)
-        print(action, ALARM_TRIGGERED, SYSTEM_ACTIVATED)
+        # print(action, ALARM_TRIGGERED, SYSTEM_ACTIVATED)
         if action == 1:
             print(ALARM_TRIGGERED, SYSTEM_ACTIVATED)
             if SYSTEM_ACTIVATED:
                 if ALARM_TRIGGERED:
+                    print("Turn off Alarm")
                     ALARM_TRIGGERED = False
                     send_ws_message("ALARM", json.dumps({"alarm": 0}))
-                    untrigger_alarm()
+                    untrigger_alarm(data['name'])
                 else:
+                    print("Turn off system")
                     SYSTEM_ACTIVATED = False
             else:
+                print("Turn on system")
                 SYSTEM_ACTIVATED = True
         else:
             print("Wrong pin")
@@ -270,29 +273,29 @@ def parse_gdht(data):
 def trigger_alarm(trigger, pi, simulated):
     send_message("ALARM", json.dumps({"alarm": 1}))
 
-    # TODO: why is it not writing trigger?!?!?!
     t = time.strftime('%H:%M:%S', time.localtime())
     data = {
         "measurement": "ALARM",
         "name": "ALARM",
-        # "trigger": trigger,
-        # "simulated": simulated,
-        # "runsOn": pi,
+        "trigger": trigger,
+        "simulated": simulated,
+        "runsOn": pi,
         "values": {
             "alarm": 1
         },
         "code": 200,
         "timestamp": t
     }
-    write_to_db(data)
+    write_alarm(data)
 
     send_ws_message("ALARM", json.dumps({"alarm": 1}))
 
-def untrigger_alarm():
+def untrigger_alarm(trigger):
     t = time.strftime('%H:%M:%S', time.localtime())
     data = {
         "measurement": "ALARM",
         "name": "ALARM",
+        "trigger": trigger,
         "values": {
             "alarm": 0
         },
@@ -300,6 +303,21 @@ def untrigger_alarm():
         "timestamp": t
     }
     write_to_db(data)
+
+
+def write_alarm(data):
+    write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
+    point = (
+        Point(data["measurement"])
+        .tag("name", data["name"])
+        .tag("trigger", data["trigger"])
+        .tag('code', data["code"])
+    )
+    for field_name, field_value in data["values"].items():
+        point.field(field_name, float(field_value))
+    point.field("timestamp", data["timestamp"])
+
+    write_api.write(bucket=bucket, org=org, record=point)
 
 
 def write_to_db(data):
@@ -313,7 +331,7 @@ def write_to_db(data):
         .tag('code', data["code"])
     )
     for field_name, field_value in data["values"].items():
-        point.field(field_name, field_value)
+        point.field(field_name, float(field_value))
     point.field("timestamp", data["timestamp"])
 
     write_api.write(bucket=bucket, org=org, record=point)
@@ -331,14 +349,14 @@ def create_app():
     app = Flask(__name__)
 
     # Configuration options
-    app.config['DEBUG'] = True
+    app.config['DEBUG'] = False
 
     CORS(app)
     socketio = SocketIO(app)
     socketio.init_app(app, cors_allowed_origins="*")
 
     # InfluxDB Configuration
-    token = "MIrHD7Jt64G1u8BmAC3nmhhYqJ4P12gp953nT6-Khz-DRofp_tz5FNPHXfwUFrIqckQzP1H8vLo7t-cNfvp7hA=="
+    token = "jc_z64EpsUKfOuzrC59wfSFbULrK-X_vaQ8-SYjyIBy3ct3pEJDmZxUauysYcb8W-4g-gahpOZJPKE8xox0yNA=="
     org = "iot"
     url = "http://localhost:8086"
     bucket = "iote"
@@ -400,7 +418,7 @@ def create_app():
             global ALARM_TRIGGERED
             ALARM_TRIGGERED = False
             send_message("ALARM", json.dumps({"alarm": 0}))
-            untrigger_alarm()
+            untrigger_alarm("web")
             return jsonify({}), 200
         except ValueError as ex:
             return jsonify({'error': str(ex)}), 400
