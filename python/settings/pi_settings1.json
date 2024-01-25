@@ -103,7 +103,7 @@
     "GDHT": {
       "name": "GDHT",
       "simulated": true,
-      "pin": 22,
+      "pin": 14,
       "runsOn": "Pi2",
       "hostname": "localhost",
       "port": 1883

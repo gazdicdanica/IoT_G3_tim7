@@ -28,7 +28,7 @@ class DHT:
         GPIO.output(pin, GPIO.LOW)
         time.sleep(wakeupDelay)
         GPIO.output(pin, GPIO.HIGH)
-        # time.sleep(40*0.000001)
+        time.sleep(40*0.000001)
         GPIO.setup(pin, GPIO.IN)
 
         loopCnt = self.DHTLIB_TIMEOUT
