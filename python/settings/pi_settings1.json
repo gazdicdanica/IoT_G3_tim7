@@ -193,7 +193,7 @@
     "BRGB": {
       "name": "BRGB",
       "simulated": true,
-      "R_pin": 12,
+      "R_pin": 20,
       "G_pin": 13,
       "B_pin": 19,
       "runsOn": "Pi3",
