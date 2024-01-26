@@ -121,6 +121,7 @@ def run_db_loop(should_turn_on_db, should_turn_on_bb, input_queue, db, delay, ca
                 db.turn_on()
                 callback(True, name, False, runsOn)
             else:
+
                 db.turn_off()
                 callback(False, name, False, runsOn)
         if input_queue.qsize() > 0 and name == "BB":
@@ -141,4 +142,4 @@ def run_db_loop(should_turn_on_db, should_turn_on_bb, input_queue, db, delay, ca
             db.turn_off()
             callback(False, name, False, runsOn)
         else:
-            time.sleep(delay)
+            time.sleep(0.2)

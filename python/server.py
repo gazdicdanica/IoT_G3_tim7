@@ -95,7 +95,7 @@ def parse_data(data, topic=None):
     global ALARM_TRIGGERED, SYSTEM_ACTIVATED
 
 
-    if topic == "ALERT":
+    if topic == "ALERT" and SYSTEM_ACTIVATED:
         trigger_alarm(data['name'], data["runsOn"], data["simulated"])
         ALARM_TRIGGERED = True
 
@@ -169,28 +169,32 @@ def parse_dms(data):
             data = json.loads(data)
         values = data.get('values', {})
         action = values.get('action', 0)
-        # print(action, ALARM_TRIGGERED, SYSTEM_ACTIVATED)
+        print(action, ALARM_TRIGGERED, SYSTEM_ACTIVATED)
         if action == 1:
-            print(ALARM_TRIGGERED, SYSTEM_ACTIVATED)
+            # print(ALARM_TRIGGERED, SYSTEM_ACTIVATED)
             if SYSTEM_ACTIVATED:
                 if ALARM_TRIGGERED:
                     print("Turn off Alarm")
                     ALARM_TRIGGERED = False
                     send_ws_message("ALARM", json.dumps({"alarm": 0}))
                     untrigger_alarm(data['name'])
+                    send_message("ALARM", json.dumps({"alarm": 0}))
                 else:
                     print("Turn off system")
                     SYSTEM_ACTIVATED = False
             else:
                 print("Turn on system")
                 SYSTEM_ACTIVATED = True
+            send_message("DMS_Data", json.dumps({"triggered": ALARM_TRIGGERED, "activated": SYSTEM_ACTIVATED}))
         else:
-            print("Wrong pin")
-            trigger_alarm(data['name'], data["runsOn"], data["simulated"])
-            return
-        send_message("DMS_Data", json.dumps({"triggered": ALARM_TRIGGERED, "activated": SYSTEM_ACTIVATED}))
-        write_to_db(data)
+            if SYSTEM_ACTIVATED:
+                print("Wrong pin")
+                trigger_alarm(data['name'], data["runsOn"], data["simulated"])
+                
+                send_message("DMS_Data", json.dumps({"triggered": ALARM_TRIGGERED, "activated": SYSTEM_ACTIVATED}))
+        # write_to_db(data)
     except:
+        print(data)
         print("Error decoding JSON data")
 
 
@@ -302,7 +306,7 @@ def untrigger_alarm(trigger):
         "code": 200,
         "timestamp": t
     }
-    write_to_db(data)
+    write_alarm(data)
 
 
 def write_alarm(data):
